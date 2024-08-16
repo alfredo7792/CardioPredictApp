@@ -1,70 +1,158 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { useAuth } from './AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role_id: number;
 }
 
+const HomeScreen: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    setIsAdmin(user?.role === 'admin');
+
+    if (user?.role === 'admin') {
+      fetch(`${process.env.EXPO_API_URL}/users`)
+        .then(response => response.json())
+        .then((data: User[]) => setUsers(data))
+        .catch(error => console.error('Error fetching users:', error));
+    }
+  }, [user]);
+
+  const handleEdit = (userId: number) => {
+    console.log(`Edit user ${userId}`);
+  };
+
+  const handleDelete = (userId: number) => {
+    console.log(`Delete user ${userId}`);
+  };
+
+  const renderItem = ({ item }: { item: User }) => (
+    <View style={styles.tableRow}>
+      <Text style={styles.tableCell}>{item.first_name} {item.last_name}</Text>
+      <Text style={styles.tableCell}>{item.email}</Text>
+      <Text style={styles.tableCell}>Role: {item.role_id}</Text>
+      <View style={styles.tableActions}>
+        <TouchableOpacity onPress={() => handleEdit(item.id)}>
+          <Text style={styles.actionButton}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDelete(item.id)}>
+          <Text style={styles.actionButton}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Welcome!</Text>
+        <HelloWave />
+      </View>
+      {isAdmin && (
+        <View style={styles.tableContainer}>
+          <Text style={styles.subtitle}>User List</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.headerCell}>Name</Text>
+            <Text style={styles.headerCell}>Email</Text>
+            <Text style={styles.headerCell}>Role</Text>
+            <Text style={styles.headerCell}>Actions</Text>
+          </View>
+          <FlatList
+            data={users}
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+          />
+        </View>
+      )}
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser' as never)}>
+        <Text style={styles.buttonText}>Crear Nuevo Usuario</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    padding: 16,
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  tableContainer: {
+    marginVertical: 16,
+    marginHorizontal: 8,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  tableHeader: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 8,
+  },
+  headerCell: {
+    flex: 1,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    alignItems: 'center',
+  },
+  tableCell: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  tableActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '30%',
+  },
+  actionButton: {
+    color: '#007BFF',
+    marginHorizontal: 5,
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
+
+export default HomeScreen;
