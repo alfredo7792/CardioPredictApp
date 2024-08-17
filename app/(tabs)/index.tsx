@@ -27,27 +27,31 @@ const HomeScreen: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
-  const navigation = useNavigation<any>(); // Usar el tipo adecuado para la navegación
+  const navigation = useNavigation<any>();
 
+  // Fetch roles only once when the component mounts
   useEffect(() => {
-    if (user) {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch(`${EXPO_API_URL}/roles`);
+        if (!response.ok) {
+          throw new Error('Error fetching roles');
+        }
+        const result = await response.json();
+        setRoles(result);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    };
+
+    fetchRoles();
+  }, []); // Empty dependency array to run only once
+
+  // Fetch user data when user changes and roles are available
+  useEffect(() => {
+    if (user && roles.length > 0) {
       setIsAdmin(user.role === 'admin');
       setIsMedico(user.role === 'medico');
-
-      const fetchRoles = async () => {
-        try {
-          const response = await fetch('http://127.0.0.1:8080/roles');
-          if (!response.ok) {
-            throw new Error('Error fetching roles');
-          }
-          const result = await response.json();
-          setRoles(result);
-        } catch (error) {
-          console.error('Error fetching roles:', error);
-        }
-      };
-
-      fetchRoles();
 
       const fetchData = async () => {
         try {
@@ -55,7 +59,7 @@ const HomeScreen: React.FC = () => {
           if (user.role === 'admin') {
             url = `${EXPO_API_URL}/users`;
           } else if (user.role === 'medico') {
-            url = 'http://127.0.0.1:8080/clients';
+            url = `${EXPO_API_URL}/clients`;
           }
 
           if (url) {
@@ -77,7 +81,7 @@ const HomeScreen: React.FC = () => {
 
       fetchData();
     }
-  }, [user, roles]);
+  }, [user, roles]); // Run when user or roles change, but roles should be available first
 
   const handleEdit = (id: number) => {
     navigation.navigate('editFormUser', { userId: id });
@@ -89,9 +93,9 @@ const HomeScreen: React.FC = () => {
     try {
       let url = '';
       if (user?.role === 'admin') {
-        url = `http://127.0.0.1:8080/users/${selectedId}`;
+        url = `${EXPO_API_URL}/users/${selectedId}`;
       } else if (user?.role === 'medico') {
-        url = `http://127.0.0.1:8080/clients/${selectedId}`;
+        url = `${EXPO_API_URL}/clients/${selectedId}`;
       }
 
       if (url) {
@@ -110,7 +114,7 @@ const HomeScreen: React.FC = () => {
             if (user?.role === 'admin') {
               fetchUrl = `${EXPO_API_URL}/users`;
             } else if (user?.role === 'medico') {
-              fetchUrl = 'http://127.0.0.1:8080/clients';
+              fetchUrl = `${EXPO_API_URL}/clients`;
             }
 
             if (fetchUrl) {
