@@ -45,6 +45,15 @@ const TabLayout: React.FC = () => {
             ),
           }}
         />
+        <Tabs.Screen
+          name="chatbot"
+          options={{
+            title: 'Chatbot(temporal)(Resultados)',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+            ),
+          }}
+        />
       </Tabs>
     ) : (
       <LoginScreen onLogin={login} />
