@@ -28,6 +28,15 @@ const TabLayout: React.FC = () => {
           }}
         />
         <Tabs.Screen
+          name="RevisionsListScreen"
+          options={{
+            title: 'Revisiones',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="explore"
           options={{
             title: 'Explore',
@@ -39,7 +48,7 @@ const TabLayout: React.FC = () => {
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
+            title: 'Perfil',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
             ),
