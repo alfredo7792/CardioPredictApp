@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Button } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
-import { useAuth } from './AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Button, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
+
 
 interface User {
   id: number;
@@ -161,52 +162,60 @@ const HomeScreen: React.FC = () => {
     </View>
   );
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Bienvenido!</Text>
-        <HelloWave />
-      </View>
-      {(isAdmin || isMedico) && (
-        <View style={styles.tableContainer}>
-          <Text style={styles.subtitle}>{isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser')}>
-            <Text style={styles.buttonText}>Nuevo</Text>
-          </TouchableOpacity>
-          <View style={styles.tableHeader}>
-            <Text style={styles.headerCell}>Name</Text>
-            <Text style={styles.headerCell}>Email</Text>
-            {isAdmin && <Text style={styles.headerCell}>Role</Text>}
-            <Text style={styles.headerCell}>Actions</Text>
-          </View>
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
-          />
-        </View>
-      )}
+// Resto del código...
 
-      {/* Modal for delete confirmation */}
-      <Modal
-        transparent={true}
-        visible={showModal}
-        animationType="slide"
-        onRequestClose={() => setShowModal(false)}
-      >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Confirmar eliminación</Text>
-            <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
-            <View style={styles.modalButtons}>
-              <Button title="Cancelar" onPress={() => setShowModal(false)} />
-              <Button title="Eliminar" onPress={handleDelete} />
-            </View>
+return (
+  <View style={styles.container}>
+    <View style={styles.titleContainer}>
+      <Text style={styles.title}>Bienvenido!</Text>
+      <HelloWave />
+    </View>
+    {(isAdmin || isMedico) && (
+      <View style={styles.tableContainer}>
+        <Text style={styles.subtitle}>{isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser')}>
+          <Text style={styles.buttonText}>Nuevo</Text>
+        </TouchableOpacity>
+        <View style={styles.tableHeader}>
+          <Text style={styles.headerCell}>Name</Text>
+          <Text style={styles.headerCell}>Email</Text>
+          {isAdmin && <Text style={styles.headerCell}>Role</Text>}
+          <Text style={styles.headerCell}>Actions</Text>
+        </View>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      </View>
+    )}
+
+    {/* Modal for delete confirmation */}
+    <Modal
+      transparent={true}
+      visible={showModal}
+      animationType="slide"
+      onRequestClose={() => setShowModal(false)}
+    >
+      <View style={styles.modalBackground}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Confirmar eliminación</Text>
+          <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
+          <View style={styles.modalButtons}>
+            <Button title="Cancelar" onPress={() => setShowModal(false)} />
+            <Button title="Eliminar" onPress={handleDelete} />
           </View>
         </View>
-      </Modal>
-    </View>
-  );
+      </View>
+    </Modal>
+
+    {/* Botón de Consultas */}
+    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ConsultasScreen')}>
+  <Text style={styles.buttonText}>Consultas</Text>
+</TouchableOpacity>
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
@@ -331,6 +340,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
+  buttonConsulta: {
+    alignSelf: 'center',
+    backgroundColor: '#28a745', // Cambia el color si lo deseas
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+  },  
 });
 
 export default HomeScreen;
