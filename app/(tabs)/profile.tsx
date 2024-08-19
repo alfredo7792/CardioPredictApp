@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
+import {EXPO_API_URL} from './enviroment';
 
 interface Profile {
   id: number;
@@ -32,14 +33,14 @@ export default function ProfileScreen() {
     const fetchProfile = async () => {
       if (user) {
         try {
-          const profileResponse = await fetch(`http://127.0.0.1:8080/users/${user.user_id}`);
+          const profileResponse = await fetch(`${EXPO_API_URL}/users/${user.user_id}`);
           if (!profileResponse.ok) {
             throw new Error('Failed to fetch profile');
           }
           const profileData: Profile = await profileResponse.json();
           setProfile(profileData);
 
-          const roleResponse = await fetch('http://127.0.0.1:8080/roles');
+          const roleResponse = await fetch(`${EXPO_API_URL}/roles`);
           if (!roleResponse.ok) {
             throw new Error('Failed to fetch roles');
           }

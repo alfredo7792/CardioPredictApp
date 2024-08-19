@@ -1,9 +1,10 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { EXPO_API_URL } from './(tabs)/enviroment';
 
-const API_URL = 'http://127.0.0.1:8080/users';
-const ROLES_URL = 'http://127.0.0.1:8080/roles';
+const API_URL = EXPO_API_URL+'/users';
+const ROLES_URL = EXPO_API_URL+ '/roles';
 
 const EditFormUser: React.FC = () => {
   const route = useRoute();
