@@ -1,20 +1,20 @@
 import { HelloWave } from '@/components/HelloWave';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Button, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
-
 
 interface User {
   id: number;
   first_name: string;
   last_name: string;
+  DNI: string;
   email: string;
   role_id: number;
-  role_name?: string; // Agregar el nombre del rol
+  role_name?: string;
   age: number;
-  sex:string;
+  sex: string;
 }
 
 interface Role {
@@ -30,9 +30,10 @@ const HomeScreen: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [lastNameFilter, setLastNameFilter] = useState<string>('');
+  const [dniFilter, setDniFilter] = useState<string>('');
   const navigation = useNavigation<any>();
 
-  // Fetch roles only once when the component mounts
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -48,9 +49,8 @@ const HomeScreen: React.FC = () => {
     };
 
     fetchRoles();
-  }, []); // Empty dependency array to run only once
+  }, []);
 
-  // Fetch user data when user changes and roles are available
   useEffect(() => {
     if (user && roles.length > 0) {
       setIsAdmin(user.role === 'admin');
@@ -84,7 +84,7 @@ const HomeScreen: React.FC = () => {
 
       fetchData();
     }
-  }, [user, roles]); // Run when user or roles change, but roles should be available first
+  }, [user, roles]);
 
   const handleEdit = (id: number) => {
     navigation.navigate('editFormUser', { userId: id });
@@ -110,7 +110,6 @@ const HomeScreen: React.FC = () => {
           throw new Error(`Error deleting item from ${url}`);
         }
 
-        // Refresh data after deletion
         const fetchData = async () => {
           try {
             let fetchUrl = '';
@@ -152,175 +151,212 @@ const HomeScreen: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleConsulta = (id: number, age:number,sex:string) => {
-    navigation.navigate('ConsultasScreen', { clientId: id , ageCategory:age, sex:sex });
+  const handleConsulta = (id: number, age: number, sex: string) => {
+    navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
-  
+
+  const filteredData = data.filter(user => {
+    return (
+      (!lastNameFilter || user.last_name.toLowerCase().includes(lastNameFilter.toLowerCase())) &&
+      (!dniFilter || user.DNI.toString().includes(dniFilter))
+    );
+  });
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
+      <Text style={styles.tableCell}>{item.DNI}</Text>
       <Text style={styles.tableCell}>{item.first_name} {item.last_name}</Text>
       <Text style={styles.tableCell}>{item.email}</Text>
       {isAdmin && <Text style={styles.tableCell}>{item.role_name}</Text>}
       <View style={styles.tableActions}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleEdit(item.id)}>
+        <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
           <Text style={styles.actionButtonText}>Actualizar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => confirmDelete(item.id)}>
+        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
           <Text style={styles.actionButtonText}>Eliminar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleConsulta(item.id, item.age,item.sex)}>
+        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
           <Text style={styles.actionButtonText}>Consultas</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-  
 
-// Resto del código...
-
-return (
-  <View style={styles.container}>
-    <View style={styles.titleContainer}>
-      <Text style={styles.title}>Bienvenido!</Text>
-      <HelloWave />
-    </View>
-    {(isAdmin || isMedico) && (
-      <View style={styles.tableContainer}>
-        <Text style={styles.subtitle}>{isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser')}>
-          <Text style={styles.buttonText}>Nuevo</Text>
-        </TouchableOpacity>
-        <View style={styles.tableHeader}>
-          <Text style={styles.headerCell}>Name</Text>
-          <Text style={styles.headerCell}>Email</Text>
-          {isAdmin && <Text style={styles.headerCell}>Role</Text>}
-          <Text style={styles.headerCell}>Actions</Text>
-        </View>
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-        />
+  return (
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Bienvenido!</Text>
+        <HelloWave />
       </View>
-    )}
+      {(isAdmin || isMedico) && (
+        <View style={styles.tableContainer}>
+          <Text style={styles.subtitle}>{isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser')}>
+            <Text style={styles.buttonText}>Nuevo</Text>
+          </TouchableOpacity>
+          <View style={styles.filtersContainer}>
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Filtrar por apellido"
+              value={lastNameFilter}
+              onChangeText={setLastNameFilter}
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="Filtrar por DNI"
+              value={dniFilter}
+              onChangeText={setDniFilter}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.tableHeader}>
+          <Text style={styles.headerCell}>DNI</Text>
+            <Text style={styles.headerCell}>Name</Text>
+            <Text style={styles.headerCell}>Email</Text>
+            {isAdmin && <Text style={styles.headerCell}>Role</Text>}
+            <Text style={styles.headerCell}>Acciones</Text>
+          </View>
+          <FlatList
+            data={filteredData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        </View>
+      )}
 
-    {/* Modal for delete confirmation */}
-    <Modal
-      transparent={true}
-      visible={showModal}
-      animationType="slide"
-      onRequestClose={() => setShowModal(false)}
-    >
-      <View style={styles.modalBackground}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Confirmar eliminación</Text>
-          <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
-          <View style={styles.modalButtons}>
-            <Button title="Cancelar" onPress={() => setShowModal(false)} />
-            <Button title="Eliminar" onPress={handleDelete} />
+      <Modal
+        transparent={true}
+        visible={showModal}
+        animationType="slide"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirmar eliminación</Text>
+            <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => setShowModal(false)}>
+                <Text style={styles.actionButtonText}>CANCELAR</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
+                <Text style={styles.actionButtonText}>ELIMINAR</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
 
-    {/* Botón de Consultas */}
-    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ConsultasScreen')}>
-  <Text style={styles.buttonText}>Consultas</Text>
-</TouchableOpacity>
-  </View>
-);
-
+      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ConsultasScreen')}>
+        <Text style={styles.buttonText}>Consultas</Text>
+      </TouchableOpacity> */}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     padding: 16,
   },
   titleContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginVertical: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginRight: 8,
-  },
-  tableContainer: {
-    width: '100%',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    color: '#333',
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  tableContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    elevation: 3,
   },
   tableHeader: {
     flexDirection: 'row',
-    borderBottomWidth: 2,
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    paddingBottom: 8,
-    marginBottom: 8,
   },
   headerCell: {
     flex: 1,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#555',
+    color: '#333',
+    textAlign: 'center', // Centra el texto de las cabeceras
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    alignItems: 'center',
   },
   tableCell: {
     flex: 1,
-    textAlign: 'center',
     color: '#333',
+    textAlign: 'center', // Centra el texto de las celdas
   },
   tableActions: {
-    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
+    flex: 1,
   },
   actionButton: {
-    backgroundColor: '#007BFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    padding: 8,
+    borderRadius: 5,
+  },
+  editButton: {
+    backgroundColor: '#4CAF50',
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+  },
+  consultaButton: {
+    backgroundColor: '#2196F3',
   },
   actionButtonText: {
     color: '#fff',
-    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center', // Centra el texto de los botones de acción
   },
   button: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#007BFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-    marginBottom: 16,
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  filterInput: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+  },
+  centerText: {
+    textAlign: 'center',
   },
   modalBackground: {
     flex: 1,
@@ -329,40 +365,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: 300,
+    width: '50%',
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+    padding: 20,
+    borderRadius: 10,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   modalMessage: {
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
-  },
-  buttonConsulta: {
-    alignSelf: 'center',
-    backgroundColor: '#28a745', // Cambia el color si lo deseas
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 5,
-    marginTop: 20,
-  },  
+  },
 });
 
 export default HomeScreen;
