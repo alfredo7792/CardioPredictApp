@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 
 interface Revision {
@@ -13,6 +14,9 @@ interface Revision {
   patient_status: 'LEVE' | 'MEDIO' | 'GRAVE';
   date_created: string;
 }
+
+type PatientStatus = 'LEVE' | 'MEDIO' | 'GRAVE';
+
 // Función para convertir segundos a formato hora
 const convertSecondsToTime = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
@@ -36,7 +40,7 @@ const convertSecondsToTimeForm24 = (seconds: number) => {
     .hours(hours)
     .minutes(minutes)
     .seconds(secs)
-    .format('HH:mm:ss'); 
+    .format('HH:mm:ss');
 };
 
 const convertTimeToSeconds = (time: string) => {
@@ -52,6 +56,7 @@ const RevisionsListScreen: React.FC = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [newRevision, setNewRevision] = useState<Partial<Revision>>({});
   const [isDeleteModal, setIsDeleteModal] = useState<boolean>(false);
+  const [selectedValue, setSelectedValue] = useState("LEVE");
   const [isTimePickerVisible, setIsTimePickerVisible] = useState<boolean>(false);
   const [timeType, setTimeType] = useState<'start_time' | 'end_time' | null>(null);
 
@@ -75,11 +80,11 @@ const RevisionsListScreen: React.FC = () => {
   }, []);
 
   const handleEdit = (revision: Revision | null) => {
-    if(revision){
-      console.log("hora de inicio:",revision.start_time);
+    if (revision) {
+      console.log("hora de inicio:", revision.start_time);
     }
     setNewRevision(revision ? { ...revision } : {
-      start_time:5,
+      start_time: 5,
       end_time: 5,
       diagnosis: '',
       key_factors: '',
@@ -178,7 +183,6 @@ const RevisionsListScreen: React.FC = () => {
   const confirmDelete = (id: number) => {
     setSelectedId(id);
     setIsDeleteModal(true);
-    setShowModal(true);
   };
 
   const showTimePicker = (type: 'start_time' | 'end_time') => {
@@ -194,18 +198,20 @@ const RevisionsListScreen: React.FC = () => {
     setIsTimePickerVisible(false);
   };
 
+  // -------------------------------- RENDERIZAR ---------------------
   const renderItem = ({ item }: { item: Revision }) => (
     <View style={styles.tableRow}>
       <Text style={styles.tableCell}>{item.id}</Text>
       <Text style={styles.tableCell}>{convertSecondsToTime(item.start_time)}</Text>
       <Text style={styles.tableCell}>{convertSecondsToTime(item.end_time)}</Text>
       <Text style={styles.tableCell}>{item.diagnosis}</Text>
+      <Text style={styles.tableCell}>{item.key_factors}</Text>
       <Text style={styles.tableCell}>{item.patient_status}</Text>
       <View style={styles.tableActions}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleEdit(item)}>
+        <TouchableOpacity style={styles.actionButtonEdit} onPress={() => handleEdit(item)}>
           <Text style={styles.actionButtonText}>Editar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => confirmDelete(item.id)}>
+        <TouchableOpacity style={styles.actionButtonDelete} onPress={() => confirmDelete(item.id)}>
           <Text style={styles.actionButtonText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
@@ -222,11 +228,12 @@ const RevisionsListScreen: React.FC = () => {
         </TouchableOpacity>
         <View style={styles.tableHeader}>
           <Text style={styles.headerCell}>ID</Text>
-          <Text style={styles.headerCell}>Start Time</Text>
-          <Text style={styles.headerCell}>End Time</Text>
-          <Text style={styles.headerCell}>Diagnosis</Text>
-          <Text style={styles.headerCell}>Status</Text>
-          <Text style={styles.headerCell}>Actions</Text>
+          <Text style={styles.headerCell}>Hora inicio</Text>
+          <Text style={styles.headerCell}>Hora final</Text>
+          <Text style={styles.headerCell}>Diagnostico</Text>
+          <Text style={styles.headerCell}>Comentario</Text>
+          <Text style={styles.headerCell}>Estado</Text>
+          <Text style={styles.headerCell}>Opciones</Text>
         </View>
         <FlatList
           data={data}
@@ -252,7 +259,7 @@ const RevisionsListScreen: React.FC = () => {
                 const timeInSeconds = convertTimeToSeconds(formattedText);
                 setNewRevision({ ...newRevision, start_time: timeInSeconds });
               }}
-              value={convertSecondsToTimeForm24(newRevision.start_time||0)}
+              value={convertSecondsToTimeForm24(newRevision.start_time || 0)}
               keyboardType="numeric"
             />
             <TextInput
@@ -262,7 +269,7 @@ const RevisionsListScreen: React.FC = () => {
                 const timeInSeconds = convertTimeToSeconds(formattedText);
                 setNewRevision({ ...newRevision, end_time: timeInSeconds });
               }}
-              value={convertSecondsToTimeForm24(newRevision.end_time||0)}
+              value={convertSecondsToTimeForm24(newRevision.end_time || 0)}
               keyboardType="numeric"
             />
             <TextInput
@@ -277,15 +284,21 @@ const RevisionsListScreen: React.FC = () => {
               value={newRevision.key_factors || ''}
               onChangeText={(text) => setNewRevision({ ...newRevision, key_factors: text })}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Patient Status"
-              value={newRevision.patient_status || 'LEVE'}
-              onChangeText={(text) => setNewRevision({ ...newRevision, key_factors: text })}
-            />
+            <Picker
+              selectedValue={selectedValue}
+              style={styles.picker}
+              onValueChange={(itemValue) => {
+                setSelectedValue(itemValue as PatientStatus); // Asegura que itemValue es del tipo correcto
+                setNewRevision({ ...newRevision, patient_status: itemValue as PatientStatus });
+              }}
+            >
+              <Picker.Item label="LEVE" value="LEVE" />
+              <Picker.Item label="MEDIO" value="MEDIO" />
+              <Picker.Item label="GRAVE" value="GRAVE" />
+            </Picker>
             <View style={styles.modalButtons}>
-              <Button title="Save" onPress={handleSave} />
-              <Button title="Cancel" onPress={() => setShowModal(false)} />
+              <Button title="Guardar" onPress={handleSave} />
+              <Button title="Cancelar" onPress={() => setShowModal(false)} />
             </View>
           </View>
         </View>
@@ -320,26 +333,125 @@ const RevisionsListScreen: React.FC = () => {
   );
 };
 
-
-// --------------------------------- ESTILOS ------------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  tableContainer: { flex: 1 },
-  subtitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
-  button: { backgroundColor: '#007bff', padding: 10, borderRadius: 5, marginBottom: 8 },
-  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-  tableHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 8, backgroundColor: '#f2f2f2' },
-  headerCell: { flex: 1, textAlign: 'center', fontWeight: 'bold' },
-  tableRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 8 },
-  tableCell: { flex: 1, textAlign: 'center' },
-  tableActions: { flexDirection: 'row' },
-  actionButton: { backgroundColor: '#007bff', padding: 5, borderRadius: 5, marginHorizontal: 5 },
-  actionButtonText: { color: '#fff' },
-  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContainer: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 10 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  input: { borderBottomWidth: 1, borderBottomColor: '#ccc', marginBottom: 10, padding: 10 },
-  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 10,
+  },
+  tableContainer: {
+    width: '80%',
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    padding: 10,
+  },
+  subtitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  headerCell: {
+    flex: 1,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  tableCell: {
+    flex: 1,
+    textAlign: 'left',
+  },
+  tableActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  actionButtonEdit: {
+    backgroundColor: 'green',
+    padding: 5,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  actionButtonDelete: {
+    backgroundColor: 'red',
+    padding: 5,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '50%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+    height: 50,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });
 
 export default RevisionsListScreen;
