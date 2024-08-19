@@ -222,10 +222,12 @@ const RevisionsListScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.tableContainer}>
+        <View style={styles.rowSubTitle}>
         <Text style={styles.subtitle}>Lista de Revisiones</Text>
-        <TouchableOpacity style={styles.button} onPress={() => handleEdit(null)}>
-          <Text style={styles.buttonText}>Nueva Revisión</Text>
+        <TouchableOpacity style={styles.newRevisionButton} onPress={() => handleEdit(null)}>
+          <Text style={styles.buttonText}>Nuevo</Text>
         </TouchableOpacity>
+        </View>
         <View style={styles.tableHeader}>
           <Text style={styles.headerCell}>ID</Text>
           <Text style={styles.headerCell}>Hora inicio</Text>
@@ -351,17 +353,26 @@ const styles = StyleSheet.create({
     elevation: 3,
     padding: 10,
   },
+  rowSubTitle: {
+    flexDirection: 'row', // Alinea los elementos en una fila
+    justifyContent: 'space-between', // Distribuye el espacio entre los elementos
+    alignItems: 'center', // Alinea los elementos verticalmente al centro
+    marginBottom: 20, // Ajusta el espacio debajo del contenedor
+  },
   subtitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  button: {
+  newRevisionButton: {
     backgroundColor: '#007bff',
-    padding: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 5,
+    alignSelf: 'flex-end', // Alinea el botón a la derecha
     marginBottom: 10,
     alignItems: 'center',
+    width: 100, // Ajusta el ancho del botón según sea necesario
   },
   buttonText: {
     color: '#fff',
