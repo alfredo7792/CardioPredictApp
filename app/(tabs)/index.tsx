@@ -1,7 +1,7 @@
 import { HelloWave } from '@/components/HelloWave';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Button, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
 
@@ -33,6 +33,7 @@ const HomeScreen: React.FC = () => {
   const [lastNameFilter, setLastNameFilter] = useState<string>('');
   const [dniFilter, setDniFilter] = useState<string>('');
   const navigation = useNavigation<any>();
+
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -151,6 +152,12 @@ const HomeScreen: React.FC = () => {
     setShowModal(true);
   };
 
+  const handleView = (id: number, age: number, sex: string) => {
+    navigation.navigate('indexConsultas', { id, age, sex });
+  };
+
+
+  
   const handleConsulta = (id: number, age: number, sex: string) => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
@@ -161,6 +168,8 @@ const HomeScreen: React.FC = () => {
       (!dniFilter || user.DNI.toString().includes(dniFilter))
     );
   });
+
+  
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
@@ -177,6 +186,10 @@ const HomeScreen: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
           <Text style={styles.actionButtonText}>Consultas</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
+          <Text style={styles.actionButtonText}>Ver</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -386,6 +399,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     borderRadius: 5,
+  },
+  viewButton: {
+    backgroundColor: '#00CED1', // color del botón "Ver"
   },
 });
 

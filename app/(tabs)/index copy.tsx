@@ -1,7 +1,7 @@
 import { HelloWave } from '@/components/HelloWave';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Button, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
 
@@ -89,6 +89,11 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('editFormUser', { userId: id });
   };
 
+  const handleView = () => {
+    navigation.navigate('indexConsultas');
+  };
+
+
   const handleDelete = async () => {
     if (selectedId === null) return;
 
@@ -162,10 +167,13 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.actionButtonText}>Actualizar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
-          <Text style={styles.actionButtonText}>Eliminar</Text>
+          <Text style={styles.actionButtonText}>Elimindddar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Consultas</Text>
+          <Text style={styles.actionButtonText}>ddddd</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={handleView}>
+          <Text style={styles.actionButtonText}>Ver</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -375,6 +383,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     borderRadius: 5,
+  },
+  viewButton: {
+    backgroundColor: '#00CED1', // color del botón "Ver"
   },
 });
 
