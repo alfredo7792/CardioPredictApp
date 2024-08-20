@@ -53,17 +53,16 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     if (user && roles.length > 0) {
-      setIsAdmin(user.role === 'admin');
-      setIsMedico(user.role === 'medico');
+      setIsAdmin(true);
 
       const fetchData = async () => {
         try {
-          let url = '';
-          if (user.role === 'admin') {
+          let url = `${EXPO_API_URL}/users`;
+          /* if (user.role === 'admin') {
             url = `${EXPO_API_URL}/users`;
           } else if (user.role === 'medico') {
             url = `${EXPO_API_URL}/clients`;
-          }
+          } */
 
           if (url) {
             const response = await fetch(url);
@@ -94,12 +93,7 @@ const HomeScreen: React.FC = () => {
     if (selectedId === null) return;
 
     try {
-      let url = '';
-      if (user?.role === 'admin') {
-        url = `${EXPO_API_URL}/users/${selectedId}`;
-      } else if (user?.role === 'medico') {
-        url = `${EXPO_API_URL}/clients/${selectedId}`;
-      }
+      let url = `${EXPO_API_URL}/users/${selectedId}`;
 
       if (url) {
         const response = await fetch(url, {
@@ -112,12 +106,7 @@ const HomeScreen: React.FC = () => {
 
         const fetchData = async () => {
           try {
-            let fetchUrl = '';
-            if (user?.role === 'admin') {
-              fetchUrl = `${EXPO_API_URL}/users`;
-            } else if (user?.role === 'medico') {
-              fetchUrl = `${EXPO_API_URL}/clients`;
-            }
+            let fetchUrl = `${EXPO_API_URL}/users`;
 
             if (fetchUrl) {
               const result = await fetch(fetchUrl);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
-import {EXPO_API_URL} from './enviroment';
+import { EXPO_API_URL } from './enviroment';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface Profile {
   id: number;
@@ -49,6 +50,7 @@ export default function ProfileScreen() {
           setRole(userRole);
         } catch (err) {
           console.error('Error fetching user data:', err);
+          setError('Error fetching user data');
         } finally {
           setLoading(false);
         }
@@ -61,8 +63,8 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#00BFFF" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
@@ -77,20 +79,50 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil del usuario</Text>
+      <View style={styles.profileHeader}>
+        <Image
+          style={styles.avatar}
+          source={{ uri: 'https://www.w3schools.com/w3images/avatar2.png' }} // Reemplaza con una URL real si es necesario
+        />
+        <Text style={styles.title}>Perfil del usuario</Text>
+      </View>
       {profile ? (
         <View style={styles.profileContainer}>
-          <Text style={styles.text}>Nombre de usuario: {profile.username}</Text>
-          <Text style={styles.text}>Nombre: {profile.first_name} {profile.last_name}</Text>
-          <Text style={styles.text}>DNI: {profile.DNI}</Text>
-          <Text style={styles.text}>Edad: {profile.age}</Text>
-          <Text style={styles.text}>Sexo: {profile.sex}</Text>
-          <Text style={styles.text}>Correo electrónico: {profile.email}</Text>
-          <Text style={styles.text}>Rol: {role ? role.name : 'Loading role...'}</Text>
-          <Text style={styles.text}>Fecha de registro: {new Date(profile.date_created).toLocaleDateString()}</Text>
+          <View style={styles.infoRow}>
+            <Icon name="person-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Nombre de usuario: <Text style={styles.highlight}>{profile.username}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="person" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Nombre: <Text style={styles.highlight}>{profile.first_name} {profile.last_name}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="id-card-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>DNI: <Text style={styles.highlight}>{profile.DNI}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="calendar-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Edad: <Text style={styles.highlight}>{profile.age}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="accessibility-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Sexo: <Text style={styles.highlight}>{profile.sex}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="mail-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Correo electrónico: <Text style={styles.highlight}>{profile.email}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="briefcase-outline" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Rol: <Text style={styles.highlight}>{role ? role.name : 'Loading role...'}</Text></Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="calendar" size={24} color="#007BFF" style={styles.icon} />
+            <Text style={styles.text}>Fecha de registro: <Text style={styles.highlight}>{new Date(profile.date_created).toLocaleDateString()}</Text></Text>
+          </View>
         </View>
       ) : (
-        <Text>No profile data available</Text>
+        <Text style={styles.text}>No profile data available</Text>
       )}
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
@@ -102,48 +134,83 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#f4f4f4',
+    padding: 20,
+  },
+  profileHeader: {
     alignItems: 'center',
-    padding: 16,
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#007BFF',
+    marginBottom: 10,
   },
   title: {
-    fontSize: 24,
-    marginBottom: 20,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
   },
   profileContainer: {
     width: '100%',
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    padding: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+    marginBottom: 20,
   },
   text: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+    marginLeft: 10,
+  },
+  highlight: {
+    fontWeight: 'bold',
+    color: '#007BFF',
+  },
+  loadingText: {
     fontSize: 18,
-    marginVertical: 4,
+    color: '#00BFFF',
+    marginTop: 10,
   },
   errorText: {
-    color: 'red',
     fontSize: 18,
+    color: 'red',
+    marginTop: 10,
   },
   logoutButton: {
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#FF0000',
-    borderRadius: 8,
-    elevation: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#FF3B30',
+    borderRadius: 15,
+    alignItems: 'center',
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   logoutButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    color: '#007BFF',
   },
 });
