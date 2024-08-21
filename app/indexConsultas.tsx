@@ -276,7 +276,7 @@ const IndexConsultas: React.FC = () => {
               <Picker.Item label="Grave" value="GRAVE" />
             </Picker>
             <View style={styles.modalButtons}>
-              <Button title="Guardar" onPress={handleSave} />
+              <Button title="Guardar" onPress={handleSave} color="blue" />
               <Button title="Cancelar" onPress={() => setIsEditModal(false)} color="red" />
             </View>
           </View>
@@ -434,6 +434,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
     width: 100, // Ajusta el ancho del botón según sea necesario
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50', // Color de fondo para el botón de guardar
+  },
+  cancelButton: {
+    backgroundColor: '#f44336', // Color de fondo para el botón de cancelar
   },
   tableHeader: {
     flexDirection: 'row',

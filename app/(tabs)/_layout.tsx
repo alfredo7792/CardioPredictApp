@@ -27,24 +27,6 @@ const TabLayout: React.FC = () => {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
-      />
-       <Tabs.Screen
-          name="RevisionsListScreen"
-          options={{
-            title: 'Revisiones',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
-            ),
-          }}
-        />
-      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
@@ -62,7 +44,7 @@ const TabLayout: React.FC = () => {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="kpi"
         options={{
           title: 'KPI',
@@ -70,14 +52,14 @@ const TabLayout: React.FC = () => {
             <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} />
           ),
         }}
-      />
+      /> */}
       {/* Nueva pestaña para "Reports" */}
       <Tabs.Screen
         name="reports"
         options={{
           title: 'Reports',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'document-text' : 'document-text-outline'} color={color} />
+            <TabBarIcon name={focused ? 'stats-chart' : 'document-text-outline'} color={color} />
           ),
         }}
       />

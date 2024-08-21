@@ -162,6 +162,10 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
 
+  const handleChatBot= (id: number) => {
+    navigation.navigate('chatbot2', { clientId: id});
+  };
+
   const filteredData = data.filter(user => {
     return (
       (!lastNameFilter || user.last_name.toLowerCase().includes(lastNameFilter.toLowerCase())) &&
@@ -173,10 +177,11 @@ const HomeScreen: React.FC = () => {
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
-      <Text style={styles.tableCell}>{item.DNI}</Text>
-      <Text style={styles.tableCell}>{item.first_name} {item.last_name}</Text>
-      <Text style={styles.tableCell}>{item.email}</Text>
-      {isAdmin && <Text style={styles.tableCell}>{item.role_name}</Text>}
+      <Text style={[styles.tableCell, styles.roleColumn]}>{item.DNI}</Text>
+      <Text style={[styles.tableCell, styles.roleColumn]}>{item.first_name} {item.last_name}</Text>
+      <Text style={[styles.tableCell, styles.roleColumn]}>{item.email}</Text>
+      {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>{item.role_name}</Text>}
+
       <View style={styles.tableActions}>
         <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
           <Text style={styles.actionButtonText}>Actualizar</Text>
@@ -187,7 +192,9 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
           <Text style={styles.actionButtonText}>Consultas</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
+          <Text style={styles.actionButtonText}>ChatBot</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
           <Text style={styles.actionButtonText}>Ver</Text>
         </TouchableOpacity>
@@ -223,10 +230,10 @@ const HomeScreen: React.FC = () => {
             />
           </View>
           <View style={styles.tableHeader}>
-            <Text style={styles.headerCell}>DNI</Text>
-            <Text style={styles.headerCell}>Name</Text>
-            <Text style={styles.headerCell}>Email</Text>
-            {isAdmin && <Text style={styles.headerCell}>Role</Text>}
+            <Text style={[styles.tableCell, styles.roleColumn]}>DNI</Text>
+            <Text style={[styles.tableCell, styles.roleColumn]}>Name</Text>
+            <Text style={[styles.tableCell, styles.roleColumn]}>Email</Text>
+            {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>Role</Text>}
             <Text style={styles.headerCell}>Acciones</Text>
           </View>
           <FlatList
@@ -258,10 +265,6 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-
-      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ConsultasScreen')}>
-        <Text style={styles.buttonText}>Consultas</Text>
-      </TouchableOpacity> */}
     </View>
   );
 };
@@ -341,6 +344,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center', // Centra el texto de los botones de acción
+  },
+  roleColumn: {
+    flex: 0.5, // Establece el ancho deseado para la columna "Role"
   },
   button: {
     backgroundColor: '#007bff',
