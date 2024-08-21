@@ -4,21 +4,19 @@ import { Tabs } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
-import { useAuth, AuthProvider } from './AuthContext';
-import LoginScreen from '../LoginScreen';
+import { useAuth } from './AuthContext';
 
 const TabLayout: React.FC = () => {
   const colorScheme = useColorScheme();
-  const { user, login } = useAuth();
+  const { user } = useAuth();
 
   return (
-    user ? (
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-          headerShown: false,
-        }}
-      >
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerShown: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -94,16 +92,7 @@ const TabLayout: React.FC = () => {
         }}
       />
     </Tabs>
-  ) : (
-    <LoginScreen onLogin={login} />
-    )
   );
 };
-
-const App: React.FC = () => (
-  <AuthProvider>
-    <TabLayout />
-  </AuthProvider>
-);
 
 export default TabLayout;
