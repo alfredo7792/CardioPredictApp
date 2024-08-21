@@ -1,6 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
 import { ActivityIndicator, ScrollView,View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
 import moment from 'moment';
@@ -212,12 +211,12 @@ const IndexConsultas: React.FC = () => {
               </TouchableOpacity>
             {isRevisionSaved && (
               <TouchableOpacity style={styles.buttonReview} onPress={() => handleEditRevision(item.id)}>
-                <Text style={styles.buttonText}>Ver Revision</Text>
+                <Text style={styles.buttonText}>Revisión</Text>
               </TouchableOpacity>
             )}
             {!isRevisionSaved && (
               <TouchableOpacity style={styles.buttonReview} onPress={() => handleSaveRevision(item.id)}>
-                <Text style={styles.buttonText}>Revisar</Text>
+                <Text style={styles.buttonText}>Revisión</Text>
               </TouchableOpacity>
             )}
             </View>
