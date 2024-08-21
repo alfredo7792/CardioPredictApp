@@ -157,7 +157,7 @@ const HomeScreen: React.FC = () => {
   };
 
 
-  
+
   const handleConsulta = (id: number, age: number, sex: string) => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
@@ -169,7 +169,7 @@ const HomeScreen: React.FC = () => {
     );
   });
 
-  
+
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
@@ -223,7 +223,7 @@ const HomeScreen: React.FC = () => {
             />
           </View>
           <View style={styles.tableHeader}>
-          <Text style={styles.headerCell}>DNI</Text>
+            <Text style={styles.headerCell}>DNI</Text>
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Email</Text>
             {isAdmin && <Text style={styles.headerCell}>Role</Text>}
