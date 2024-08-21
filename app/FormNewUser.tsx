@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { EXPO_API_URL } from './(tabs)/enviroment';
 
@@ -15,8 +15,7 @@ const FormScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [roleId, setRoleId] = useState('');
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
-  const [isSexDropdownVisible, setIsSexDropdownVisible] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -36,7 +35,30 @@ const FormScreen: React.FC = () => {
     fetchRoles();
   }, []);
 
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!firstName) errors.push('First name is required');
+    if (!lastName) errors.push('Last name is required');
+    if (!DNI || DNI.length !== 8 || !/^\d+$/.test(DNI)) errors.push('DNI must be exactly 8 numeric characters');
+    if (!age || parseInt(age) <= 0) errors.push('Age must be a positive number');
+    if (!sex) errors.push('Sex is required');
+    if (!username) errors.push('Username is required');
+    if (!email || !/\S+@\S+\.\S+/.test(email)) errors.push('Invalid email address');
+    if (!password || password.length < 6) errors.push('Password must be at least 6 characters long');
+    if (!roleId) errors.push('Role is required');
+
+    setErrorMessages(errors);
+
+    return errors.length === 0;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      Alert.alert('Validation Error', 'Please correct the highlighted errors.');
+      return;
+    }
+
     const newUser = {
       first_name: firstName,
       last_name: lastName,
@@ -81,6 +103,7 @@ const FormScreen: React.FC = () => {
           onChangeText={setFirstName}
           placeholder="Enter first name"
         />
+        {errorMessages.includes('First name is required') && <Text style={styles.errorText}>First name is required</Text>}
 
         <Text style={styles.label}>Last Name</Text>
         <TextInput
@@ -89,6 +112,7 @@ const FormScreen: React.FC = () => {
           onChangeText={setLastName}
           placeholder="Enter last name"
         />
+        {errorMessages.includes('Last name is required') && <Text style={styles.errorText}>Last name is required</Text>}
 
         <Text style={styles.label}>DNI</Text>
         <TextInput
@@ -96,7 +120,9 @@ const FormScreen: React.FC = () => {
           value={DNI}
           onChangeText={setDNI}
           placeholder="Enter DNI"
+          keyboardType="numeric"
         />
+        {errorMessages.includes('DNI must be exactly 8 numeric characters') && <Text style={styles.errorText}>DNI must be exactly 8 numeric characters</Text>}
 
         <Text style={styles.label}>Age</Text>
         <TextInput
@@ -106,6 +132,7 @@ const FormScreen: React.FC = () => {
           placeholder="Enter age"
           keyboardType="numeric"
         />
+        {errorMessages.includes('Age must be a positive number') && <Text style={styles.errorText}>Age must be a positive number</Text>}
 
         <Text style={styles.label}>Sex</Text>
         <View style={styles.pickerContainer}>
@@ -119,6 +146,7 @@ const FormScreen: React.FC = () => {
             <Picker.Item label="Femenino" value="F" />
           </Picker>
         </View>
+        {errorMessages.includes('Sex is required') && <Text style={styles.errorText}>Sex is required</Text>}
 
         <Text style={styles.label}>Username</Text>
         <TextInput
@@ -127,6 +155,7 @@ const FormScreen: React.FC = () => {
           onChangeText={setUsername}
           placeholder="Enter username"
         />
+        {errorMessages.includes('Username is required') && <Text style={styles.errorText}>Username is required</Text>}
 
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -134,7 +163,9 @@ const FormScreen: React.FC = () => {
           value={email}
           onChangeText={setEmail}
           placeholder="Enter email"
+          keyboardType="email-address"
         />
+        {errorMessages.includes('Invalid email address') && <Text style={styles.errorText}>Invalid email address</Text>}
 
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -144,17 +175,14 @@ const FormScreen: React.FC = () => {
           placeholder="Enter password"
           secureTextEntry
         />
+        {errorMessages.includes('Password must be at least 6 characters long') && <Text style={styles.errorText}>Password must be at least 6 characters long</Text>}
 
         <Text style={styles.label}>Role</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={roleId ?? ""}
             style={styles.picker}
-            onValueChange={(itemValue) => {
-              setRoleId(itemValue);
-              const selectedRole = roles.find(role => role.id === itemValue);
-              setSelectedRole(selectedRole ? selectedRole.name : null);
-            }}
+            onValueChange={(itemValue) => setRoleId(itemValue)}
           >
             <Picker.Item label="Select a role" value="" />
             {roles.map((role) => (
@@ -162,7 +190,8 @@ const FormScreen: React.FC = () => {
             ))}
           </Picker>
         </View>
-        
+        {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
+
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Register</Text>
@@ -224,6 +253,10 @@ const styles = StyleSheet.create({
   picker: {
     height: 44,
     backgroundColor: '#f9f9f9',
+  },
+  errorText: {
+    color: '#f44336',
+    marginBottom: 16,
   },
   buttonsContainer: {
     flexDirection: 'row',
