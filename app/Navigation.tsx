@@ -5,6 +5,7 @@ import React from 'react';
 import HomeScreen from './(tabs)/index';
 import ConsultasScreen from './ConsultasScreen';
 import EditFormUser from './editFormUser';
+import IndexConsultas from './indexConsultas';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,8 @@ const Navigation = () => {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Edit" component={EditFormUser} />
         <Stack.Screen name="ConsultasScreen" component={ConsultasScreen} />
+        <Stack.Screen name="indexConsultas" component={IndexConsultas}  />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

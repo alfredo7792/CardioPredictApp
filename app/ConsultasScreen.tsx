@@ -21,7 +21,7 @@ const getSexValue = (sex: string): string => {
     return "2";
   } else {
     alert("Sexo no válido");
-    return ""; 
+    return "";
   }
 };
 
@@ -50,7 +50,7 @@ const ConsultasScreen: React.FC = () => {
   const [step, setStep] = useState(1);
 
   const [clientId, setClientId] = useState(route.params?.clientId?.toString() || ''); // Recibe clientId como string
-  const [sex, setSex]  = useState(Number(getSexValue(route.params?.sex?.toString() || '')));
+  const [sex, setSex] = useState(Number(getSexValue(route.params?.sex?.toString() || '')));
   const [ageCategory, setAgeCategory] = useState(Number(getAgeValue(Number(route.params?.ageCategory?.toString() || ''))));
 
   const [generalHealth, setGeneralHealth] = useState('');
@@ -118,6 +118,7 @@ const ConsultasScreen: React.FC = () => {
 
       const result: ApiResponse = await response.json();
       setApiResponse(result);  // Guardar la respuesta en el estado
+      //Alert.alert('Resultado', Predicción: ${JSON.stringify(result)});
       Alert.alert('Resultado', `Predicción: ${JSON.stringify(result)}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -141,7 +142,7 @@ const ConsultasScreen: React.FC = () => {
         data: apiResponse ? Object.values(apiResponse.impacto) : [],
       },
     ],
-  };  
+  };
 
   // Ocultamos los TextInput de 'Client ID', 'Sex', y 'Age Category'
   return (
@@ -150,252 +151,262 @@ const ConsultasScreen: React.FC = () => {
 
       {step === 1 && (
         <>
-      <View style={styles.pickerContainer}>
-        <Text style={styles.label} >General Health</Text>
-        <Picker
-          selectedValue={generalHealth}
-          onValueChange={(itemValue) => setGeneralHealth(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Excelente" value="1" />
-          <Picker.Item label="Muy buena" value="2" />
-          <Picker.Item label="Buena" value="3" />
-          <Picker.Item label="Regular" value="4" />
-          <Picker.Item label="Deficiente" value="5" />
-        </Picker>
-      </View>
-      <View style={styles.container}>
-      <View style={styles.sliderContainer}>
-        <Text style={styles.label}>Physical Health Days: {physicalHealthDays}</Text>
-        <View style={styles.graduationContainer}>
-          {Array.from({ length: 30 }, (_, i) => (
-            <Text key={i} style={styles.graduation}>{i + 1 === physicalHealthDays ? `| ${i + 1}` : '|'}</Text>
-          ))}
-        </View>
-        <Slider
-          style={styles.slider}
-          minimumValue={1}
-          maximumValue={30}
-          step={1}
-          value={physicalHealthDays}
-          onValueChange={setPhysicalHealthDays}
-          minimumTrackTintColor="#1E90FF"
-          maximumTrackTintColor="#d3d3d3"
-          thumbTintColor="#1E90FF"
-        />
-      </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label} >General Health</Text>
+            <Picker
+              selectedValue={generalHealth}
+              onValueChange={(itemValue) => setGeneralHealth(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Excelente" value="1" />
+              <Picker.Item label="Muy buena" value="2" />
+              <Picker.Item label="Buena" value="3" />
+              <Picker.Item label="Regular" value="4" />
+              <Picker.Item label="Deficiente" value="5" />
+            </Picker>
+          </View>
+          <View style={styles.container}>
+            <View style={styles.sliderContainer}>
+              <Text style={styles.label}>Physical Health Days: {physicalHealthDays}</Text>
+              <View style={styles.graduationContainer}>
+                {Array.from({ length: 30 }, (_, i) => (
+                  <Text key={i} style={styles.graduation}>
+                    {i + 1 === physicalHealthDays ? `| ${i + 1}` : '|'}
+                  </Text>
+                ))}
 
-      <View style={styles.sliderContainer}>
-        <Text style={styles.label}>Mental Health Days: {mentalHealthDays}</Text>
-        <View style={styles.graduationContainer}>
-          {Array.from({ length: 30 }, (_, i) => (
-            <Text key={i} style={styles.graduation}>{i + 1 === mentalHealthDays ? `| ${i + 1}` : '|'}</Text>
-          ))}
-        </View>
-        <Slider
-          style={styles.slider}
-          minimumValue={1}
-          maximumValue={30}
-          step={1}
-          value={mentalHealthDays}
-          onValueChange={setMentalHealthDays}
-          minimumTrackTintColor="#1E90FF"
-          maximumTrackTintColor="#d3d3d3"
-          thumbTintColor="#1E90FF"
-        />
-      </View>
-    </View>
+              </View>
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={30}
+                step={1}
+                value={physicalHealthDays}
+                onValueChange={setPhysicalHealthDays}
+                minimumTrackTintColor="#1E90FF"
+                maximumTrackTintColor="#d3d3d3"
+                thumbTintColor="#1E90FF"
+              />
+            </View>
+
+            <View style={styles.sliderContainer}>
+              <Text style={styles.label}>Mental Health Days: {mentalHealthDays}</Text>
+              <View style={styles.graduationContainer}>
+                {Array.from({ length: 30 }, (_, i) => (
+                  <Text key={i} style={styles.graduation}>
+                    {i + 1 === mentalHealthDays ? `| ${i + 1}` : '|'}
+                  </Text>
+                ))}
+
+              </View>
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={30}
+                step={1}
+                value={mentalHealthDays}
+                onValueChange={setMentalHealthDays}
+                minimumTrackTintColor="#1E90FF"
+                maximumTrackTintColor="#d3d3d3"
+                thumbTintColor="#1E90FF"
+              />
+            </View>
+          </View>
 
 
-    <Button title="Siguiente" onPress={handleNext} />
+          <Button title="Siguiente" onPress={handleNext} />
         </>
       )}
 
 
-{step === 2 && (
+      {step === 2 && (
         <>
 
-    
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Physical Activities</Text>
-        <Picker
-          selectedValue={physicalActivities}
-          onValueChange={(itemValue) => setPhysicalActivities(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí" value="1" />
-          <Picker.Item label="No" value="0" />
-        </Picker>
-      </View>
-      <View style={styles.sliderContainer}>
-  <Text style={styles.label}>Sleep Hours: {sleepHours}</Text>
-  <View style={styles.graduationContainer}>
-    {Array.from({ length: 25 }, (_, i) => (
-      <Text key={i} style={styles.graduation}>{i === sleepHours ? `| ${i}` : '|'}</Text>
-    ))}
-  </View>
-  <Slider
-    style={styles.slider}
-    minimumValue={0}
-    maximumValue={24}
-    step={1}
-    value={sleepHours}
-    onValueChange={setSleepHours}
-    minimumTrackTintColor="#1E90FF"
-    maximumTrackTintColor="#d3d3d3"
-    thumbTintColor="#1E90FF"
-  />
-</View>
 
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Had Stroke</Text>
-        <Picker
-          selectedValue={hadStroke}
-          onValueChange={(itemValue) => setHadStroke(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí" value="1" />
-          <Picker.Item label="No" value="0" />
-        </Picker>
-      </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Physical Activities</Text>
+            <Picker
+              selectedValue={physicalActivities}
+              onValueChange={(itemValue) => setPhysicalActivities(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí" value="1" />
+              <Picker.Item label="No" value="0" />
+            </Picker>
+          </View>
+          <View style={styles.sliderContainer}>
+            <Text style={styles.label}>Sleep Hours: {sleepHours}</Text>
+            <View style={styles.graduationContainer}>
+
+              {Array.from({ length: 25 }, (_, i) => (
+                <Text key={i} style={styles.graduation}>
+                  {i === sleepHours ? `| ${i}` : '|'}
+                </Text>
+              ))}
+
+            </View>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={24}
+              step={1}
+              value={sleepHours}
+              onValueChange={setSleepHours}
+              minimumTrackTintColor="#1E90FF"
+              maximumTrackTintColor="#d3d3d3"
+              thumbTintColor="#1E90FF"
+            />
+          </View>
+
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Had Stroke</Text>
+            <Picker
+              selectedValue={hadStroke}
+              onValueChange={(itemValue) => setHadStroke(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí" value="1" />
+              <Picker.Item label="No" value="0" />
+            </Picker>
+          </View>
 
 
 
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Had Kidney Disease</Text>
-        <Picker
-          selectedValue={hadKidneyDisease}
-          onValueChange={(itemValue) => setHadKidneyDisease(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí" value="1" />
-          <Picker.Item label="No" value="0" />
-        </Picker>
-      </View>
-      <View style={styles.buttonContainer}>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Had Kidney Disease</Text>
+            <Picker
+              selectedValue={hadKidneyDisease}
+              onValueChange={(itemValue) => setHadKidneyDisease(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí" value="1" />
+              <Picker.Item label="No" value="0" />
+            </Picker>
+          </View>
+          <View style={styles.buttonContainer}>
             <Button title="Atrás" onPress={handleBack} />
             <Button title="Siguiente" onPress={handleNext} />
           </View>
         </>
-      )} 
+      )}
 
-{step === 3 && (
+      {step === 3 && (
         <>
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Had Diabetes</Text>
-        <Picker
-          selectedValue={hadDiabetes}
-          onValueChange={(itemValue) => setHadDiabetes(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí" value="1" />
-          <Picker.Item label="Sí, pero sólo durante el embarazo (mujer)" value="2" />
-          <Picker.Item label="No" value="3" />
-          <Picker.Item label="No, prediabetes o diabetes limítrofe" value="4" />
-        </Picker>
-      </View>
-      <View style={styles.pickerContainer}>
-        <Text style={styles.label}>Difficulty Walking</Text>
-        <Picker
-          selectedValue={difficultyWalking}
-          onValueChange={(itemValue) => setDifficultyWalking(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí, tiene dificultad para caminar" value="1" />
-          <Picker.Item label="No, camina normal" value="0" />
-        </Picker>
-      </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Had Diabetes</Text>
+            <Picker
+              selectedValue={hadDiabetes}
+              onValueChange={(itemValue) => setHadDiabetes(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí" value="1" />
+              <Picker.Item label="Sí, pero sólo durante el embarazo (mujer)" value="2" />
+              <Picker.Item label="No" value="3" />
+              <Picker.Item label="No, prediabetes o diabetes limítrofe" value="4" />
+            </Picker>
+          </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Difficulty Walking</Text>
+            <Picker
+              selectedValue={difficultyWalking}
+              onValueChange={(itemValue) => setDifficultyWalking(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí, tiene dificultad para caminar" value="1" />
+              <Picker.Item label="No, camina normal" value="0" />
+            </Picker>
+          </View>
 
 
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Smoker Status</Text>
-        <Picker
-          selectedValue={smokerStatus}
-          onValueChange={(itemValue) => setSmokerStatus(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Fumador actual - ahora fuma todos los días" value="1" />
-          <Picker.Item label="Fumador actual - ahora fuma algunos días" value="2" />
-          <Picker.Item label="Antiguo fumador" value="3" />
-          <Picker.Item label="Nunca ha fumado" value="4" />
-        </Picker>
-      </View>
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Race Ethnicity Category</Text>
-        <Picker
-          selectedValue={raceEthnicityCategory}
-          onValueChange={(itemValue) => setRaceEthnicityCategory(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sólo blancos, no hispanos" value="1" />
-          <Picker.Item label="Sólo negros, no hispanos" value="2" />
-          <Picker.Item label="Sólo otra raza, No hispano" value="3" />
-          <Picker.Item label="Multirracial, No hispano" value="4" />
-          <Picker.Item label="Hispano" value="5" />
-        </Picker>
-      </View>
-      <View style={styles.buttonContainer}>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Smoker Status</Text>
+            <Picker
+              selectedValue={smokerStatus}
+              onValueChange={(itemValue) => setSmokerStatus(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Fumador actual - ahora fuma todos los días" value="1" />
+              <Picker.Item label="Fumador actual - ahora fuma algunos días" value="2" />
+              <Picker.Item label="Antiguo fumador" value="3" />
+              <Picker.Item label="Nunca ha fumado" value="4" />
+            </Picker>
+          </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Race Ethnicity Category</Text>
+            <Picker
+              selectedValue={raceEthnicityCategory}
+              onValueChange={(itemValue) => setRaceEthnicityCategory(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sólo blancos, no hispanos" value="1" />
+              <Picker.Item label="Sólo negros, no hispanos" value="2" />
+              <Picker.Item label="Sólo otra raza, No hispano" value="3" />
+              <Picker.Item label="Multirracial, No hispano" value="4" />
+              <Picker.Item label="Hispano" value="5" />
+            </Picker>
+          </View>
+          <View style={styles.buttonContainer}>
             <Button title="Atrás" onPress={handleBack} />
             <Button title="Siguiente" onPress={handleNext} />
           </View>
         </>
-      )} 
+      )}
 
 
-{step === 4 && (
+      {step === 4 && (
         <>
-      <TextInput
-        style={styles.input}
-        placeholder="BMI"
-        keyboardType="numeric"
-        value={bmi}
-        onChangeText={setBmi}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="BMI"
+            keyboardType="numeric"
+            value={bmi}
+            onChangeText={setBmi}
+          />
 
 
-<View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Alcohol Drinkers</Text>
-        <Picker
-          selectedValue={alcoholDrinkers}
-          onValueChange={(itemValue) => setAlcoholDrinkers(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí consume alcohol" value="1" />
-          <Picker.Item label="No consume alcohol" value="0" />
-        </Picker>
-      </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Alcohol Drinkers</Text>
+            <Picker
+              selectedValue={alcoholDrinkers}
+              onValueChange={(itemValue) => setAlcoholDrinkers(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí consume alcohol" value="1" />
+              <Picker.Item label="No consume alcohol" value="0" />
+            </Picker>
+          </View>
 
 
-      <View style={styles.pickerContainer}>
-        <Text  style={styles.label}>Had High Blood Cholesterol</Text>
-        <Picker
-          selectedValue={hadHighBloodCholesterol}
-          onValueChange={(itemValue) => setHadHighBloodCholesterol(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Seleccione una opción" value="" />
-          <Picker.Item label="Sí" value="1" />
-          <Picker.Item label="No" value="0" />
-        </Picker>
-      </View>
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Had High Blood Cholesterol</Text>
+            <Picker
+              selectedValue={hadHighBloodCholesterol}
+              onValueChange={(itemValue) => setHadHighBloodCholesterol(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Seleccione una opción" value="" />
+              <Picker.Item label="Sí" value="1" />
+              <Picker.Item label="No" value="0" />
+            </Picker>
+          </View>
 
-      <Button title="Enviar" onPress={handleSubmit} />
+          <Button title="Enviar" onPress={handleSubmit} />
 
-      {apiResponse && (
-        <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>Resultado:</Text>
-          <Text style={styles.resultText}>Riesgo: {apiResponse.riesgo}</Text>
-          <Text style={styles.resultText}>Los factores mas influyentes se muestran en orden de importancia:</Text>
-          <BarChart
+          {apiResponse && (
+            <View style={styles.resultContainer}>
+              <Text style={styles.resultTitle}>Resultado:</Text>
+              <Text style={styles.resultText}>Riesgo: {apiResponse.riesgo}</Text>
+              <Text style={styles.resultText}>Los factores mas influyentes se muestran en orden de importancia:</Text>
+              <BarChart
                 data={chartData}
                 width={Dimensions.get('window').width - 40}
                 height={220}
@@ -421,18 +432,18 @@ const ConsultasScreen: React.FC = () => {
                   marginVertical: 8,
                   borderRadius: 16,
                 }}
-              />          
+              />
               <Text style={styles.resultText}>Diagnóstico: {apiResponse.diagnostico}</Text>
-          <View>
-      
-    </View>
-        </View>
+              <View>
+
+              </View>
+            </View>
 
 
+          )}
+
+        </>
       )}
-
-      </>
-      )} 
 
 
 
@@ -466,7 +477,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4A4A4A',
     marginRight: 10,
-  },  buttonContainer: {
+  }, buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

@@ -34,7 +34,6 @@ const HomeScreen: React.FC = () => {
   const [dniFilter, setDniFilter] = useState<string>('');
   const navigation = useNavigation<any>();
 
-
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -54,17 +53,16 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     if (user && roles.length > 0) {
-      setIsAdmin(user.role === 'admin');
-      setIsMedico(user.role === 'medico');
+      setIsAdmin(true);
 
       const fetchData = async () => {
         try {
-          let url = '';
-          if (user.role === 'admin') {
+          let url = `${EXPO_API_URL}/users`;
+          /* if (user.role === 'admin') {
             url = `${EXPO_API_URL}/users`;
           } else if (user.role === 'medico') {
             url = `${EXPO_API_URL}/clients`;
-          }
+          } */
 
           if (url) {
             const response = await fetch(url);
@@ -91,16 +89,16 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('editFormUser', { userId: id });
   };
 
+  const handleView = () => {
+    navigation.navigate('indexConsultas');
+  };
+
+
   const handleDelete = async () => {
     if (selectedId === null) return;
 
     try {
-      let url = '';
-      if (user?.role === 'admin') {
-        url = `${EXPO_API_URL}/users/${selectedId}`;
-      } else if (user?.role === 'medico') {
-        url = `${EXPO_API_URL}/clients/${selectedId}`;
-      }
+      let url = `${EXPO_API_URL}/users/${selectedId}`;
 
       if (url) {
         const response = await fetch(url, {
@@ -113,12 +111,7 @@ const HomeScreen: React.FC = () => {
 
         const fetchData = async () => {
           try {
-            let fetchUrl = '';
-            if (user?.role === 'admin') {
-              fetchUrl = `${EXPO_API_URL}/users`;
-            } else if (user?.role === 'medico') {
-              fetchUrl = `${EXPO_API_URL}/clients`;
-            }
+            let fetchUrl = `${EXPO_API_URL}/users`;
 
             if (fetchUrl) {
               const result = await fetch(fetchUrl);
@@ -152,12 +145,6 @@ const HomeScreen: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleView = (id: number, age: number, sex: string) => {
-    navigation.navigate('indexConsultas', { id, age, sex });
-  };
-
-
-  
   const handleConsulta = (id: number, age: number, sex: string) => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
@@ -168,8 +155,6 @@ const HomeScreen: React.FC = () => {
       (!dniFilter || user.DNI.toString().includes(dniFilter))
     );
   });
-
-  
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
@@ -182,13 +167,12 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.actionButtonText}>Actualizar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
-          <Text style={styles.actionButtonText}>Eliminar</Text>
+          <Text style={styles.actionButtonText}>Elimindddar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Consultas</Text>
+          <Text style={styles.actionButtonText}>ddddd</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={handleView}>
           <Text style={styles.actionButtonText}>Ver</Text>
         </TouchableOpacity>
       </View>
