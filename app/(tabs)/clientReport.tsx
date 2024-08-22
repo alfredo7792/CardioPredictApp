@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit'; // Asegúrate de instalar react-native-chart-kit
+import { EXPO_API_URL } from "./enviroment";
 
 const ClientReportComponent: React.FC = () => {
   const [clients, setClients] = useState([]);
@@ -12,7 +13,7 @@ const ClientReportComponent: React.FC = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/clients/');
+        const response = await axios.get(`${EXPO_API_URL}/clients/`);
         setClients(response.data);
       } catch (error) {
         console.error('Error fetching clients', error);
@@ -26,7 +27,7 @@ const ClientReportComponent: React.FC = () => {
     if (selectedClient) {
       const fetchClientData = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/clients/${selectedClient}/report`);
+          const response = await axios.get(`${EXPO_API_URL}/clients/${selectedClient}/report`);
           setClientData(response.data);
         } catch (error) {
           console.error('Error fetching client report', error);

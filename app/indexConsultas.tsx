@@ -4,7 +4,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
 import { ActivityIndicator, ScrollView,View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
 import moment from 'moment';
-
+import { EXPO_API_URL } from "./(tabs)/enviroment";
 
 interface Revision {
   id: number;
@@ -47,7 +47,6 @@ const convertTimeToSeconds = (time: string) => {
   const [hours, minutes, seconds] = time.split(':').map(Number);
   return (hours * 3600) + (minutes * 60) + seconds;
 };
-const EXPO_API_URL = 'http://localhost:8000'; 
 // ------------------------------------------------------------------------
 const IndexConsultas: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -66,7 +65,7 @@ const IndexConsultas: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/results/${id}`)
+    fetch(`${EXPO_API_URL}/results/${id}`)
       .then((response) => response.json())
       .then((json) => {
         setData(json);

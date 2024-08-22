@@ -2,6 +2,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { EXPO_API_URL } from "./enviroment";
 
 const KPIComponent: React.FC = () => {
   const [diagnosisAccuracyRate, setDiagnosisAccuracyRate] = useState<number | null>(null);
@@ -11,9 +12,9 @@ const KPIComponent: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const diagnosisResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-accuracy-rate/');
-        const severeResponse = await axios.get('http://127.0.0.1:8000/kpi/severe-case-reduction-rate/');
-        const timeResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-time-reduction-rate/');
+        const diagnosisResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-accuracy-rate/`);
+        const severeResponse = await axios.get(`${EXPO_API_URL}/kpi/severe-case-reduction-rate/`);
+        const timeResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-time-reduction-rate/`);
 
         setDiagnosisAccuracyRate(diagnosisResponse.data);
         setSevereCaseReductionRate(severeResponse.data);

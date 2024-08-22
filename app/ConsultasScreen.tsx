@@ -4,6 +4,7 @@ import { useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Alert, Button, Dimensions, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import { EXPO_API_URL } from "./(tabs)/enviroment";
 
 interface ApiResponse {
   riesgo: string;
@@ -104,7 +105,7 @@ const ConsultasScreen: React.FC = () => {
 
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/predict', {
+      const response = await fetch(`${EXPO_API_URL}/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

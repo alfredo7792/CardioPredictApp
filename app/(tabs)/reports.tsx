@@ -2,6 +2,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { EXPO_API_URL } from "./enviroment";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -16,12 +17,12 @@ const ReportsComponent: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const diagnosisResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-accuracy-rate/');
-        const severeResponse = await axios.get('http://127.0.0.1:8000/kpi/severe-case-reduction-rate/');
-        const timeResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-time-reduction-rate/');
-        const userCountResponse = await axios.get('http://127.0.0.1:8000/users/count');
-        const doctorCountResponse = await axios.get('http://127.0.0.1:8000/doctors/count');
-        const patientsDetectedResponse = await axios.get('http://127.0.0.1:8000/patients/detected/count');
+        const diagnosisResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-accuracy-rate/`);
+        const severeResponse = await axios.get(`${EXPO_API_URL}/kpi/severe-case-reduction-rate/`);
+        const timeResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-time-reduction-rate/`);
+        const userCountResponse = await axios.get(`${EXPO_API_URL}/users/count`);
+        const doctorCountResponse = await axios.get(`${EXPO_API_URL}/doctors/count`);
+        const patientsDetectedResponse = await axios.get(`${EXPO_API_URL}/patients/detected/count`);
 
         setDiagnosisAccuracyRate(diagnosisResponse.data);
         setSevereCaseReductionRate(severeResponse.data);
