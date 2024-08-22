@@ -176,7 +176,7 @@ const HomeScreen: React.FC = () => {
     <View style={styles.tableRow}>
       <Text style={[styles.tableCell, styles.roleColumn]}>{item.DNI}</Text>
       <Text style={[styles.tableCell, styles.roleColumn]}>{item.first_name} {item.last_name}</Text>
-      <Text style={[styles.tableCell, styles.roleColumn]}>{item.email}</Text>
+      {/* <Text style={[styles.tableCell, styles.roleColumn]}>{item.email}</Text> */}
       {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>{item.role_name}</Text>}
 
       <View style={styles.tableActions}>
@@ -229,7 +229,7 @@ const HomeScreen: React.FC = () => {
           <View style={styles.tableHeader}>
             <Text style={[styles.tableCell, styles.roleColumn]}>DNI</Text>
             <Text style={[styles.tableCell, styles.roleColumn]}>Name</Text>
-            <Text style={[styles.tableCell, styles.roleColumn]}>Email</Text>
+            {/* <Text style={[styles.tableCell, styles.roleColumn]}>Email</Text> */}
             {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>Role</Text>}
             <Text style={styles.headerCell}>Acciones</Text>
           </View>
@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
     padding: 16,
+    paddingBottom: 80,
   },
   titleContainer: {
     alignItems: 'center',
@@ -290,10 +291,13 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     width: '100%',
+    maxHeight: '90%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
     elevation: 3,
+    overflow: 'hidden',
+    margin: 0,
   },
   tableHeader: {
     flexDirection: 'row',
