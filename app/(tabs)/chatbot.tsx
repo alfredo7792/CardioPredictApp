@@ -9,6 +9,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { BarChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { EXPO_API_URL } from './enviroment';
 
 const STORAGE_KEY = '@chat_history';
 const COUNTER_KEY = '@chat_counter';
@@ -130,16 +131,16 @@ const Chatbot : React.FC = () => {
         // const route = useRoute<any>();
         // const { clientId } = route.params; 
 
-        // var response = await fetch(`http://127.0.0.1:8000/historial/${clientId}`);
-        var response = await fetch(`http://127.0.0.1:8000/historial/`);
+        // var response = await fetch(`${EXPO_API_URL}/historial/${clientId}`);
+        var response = await fetch(`${EXPO_API_URL}/historial/`);
         if(user.role==="paciente"){
-          response = await fetch(`http://127.0.0.1:8000/historial/${user.user_id}`);
+          response = await fetch(`${EXPO_API_URL}/historial/${user.user_id}`);
         }
         else{
           const navigation = useNavigation<any>();
           const route = useRoute<any>();
           const { clientId } = route.params; 
-          response = await fetch(`http://127.0.0.1:8000/historial/${user.user_id}`);
+          response = await fetch(`${EXPO_API_URL}/historial/${user.user_id}`);
         }
 
   
