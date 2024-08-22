@@ -42,13 +42,14 @@ export default function Response(props) {
     useEffect(() => {
         const fetchData = async () => {
             const prompt = props.prompt;
+            const prompt_img = props.prompt_img;
 
             // Generar texto con Gemini
             const text = await generateTextWithGemini(prompt);
             setGeneratedText(text);
 
             // Generar imagen con Hugging Face
-            const imageUrl = await generateImageWithHuggingFace(prompt);
+            const imageUrl = await generateImageWithHuggingFace(prompt_img);
             setGeneratedImage(imageUrl);
         };
         fetchData();
