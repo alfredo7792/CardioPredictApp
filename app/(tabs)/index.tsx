@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface User {
   id: number;
@@ -184,19 +185,19 @@ const HomeScreen: React.FC = () => {
 
       <View style={styles.tableActions}>
         <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
-          <Text style={styles.actionButtonText}>Actualizar</Text>
+          <Icon name="pencil-outline" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
-          <Text style={styles.actionButtonText}>Eliminar</Text>
+          <Icon name="trash-outline" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Consultas</Text>
+          <Icon name="medkit-outline" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
-          <Text style={styles.actionButtonText}>ChatBot</Text>
+          <Icon name="chatbubble-ellipses-outline" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Ver</Text>
+          <Icon name="eye-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
     </View>
