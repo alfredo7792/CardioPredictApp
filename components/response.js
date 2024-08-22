@@ -63,10 +63,12 @@ export default function Response({ prompt, prompt_img }) {
             // Generar texto con Gemini
             const text = await generateTextWithGemini(prompt);
             setGeneratedText(text);
-
+            if(prompt_img!=""){
             // Generar imagen con Hugging Face
             const imageUrl = await generateImageWithHuggingFace(prompt_img);
             setGeneratedImage(imageUrl);
+            }
+
         };
         fetchData();
     }, [prompt, prompt_img]);

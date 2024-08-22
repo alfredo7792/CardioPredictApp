@@ -231,7 +231,7 @@ const Chatbot2 : React.FC = () => {
   const sendMessageToGemini = async (message: string) => {
     let fullMessage: string;
 
-    if (message === 'Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.') {
+    if (message === "Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.") {
       fullMessage = `
         Toma el rol de un médico especializado en cardiología. Tienes un paciente con la siguiente información:
   
@@ -444,64 +444,69 @@ function determineHealthStatus(analysisResult: string): string {
       </ScrollView>
 
       {showChatbot && (
-        <>
-          <TouchableOpacity 
-            style={styles.overlay} 
-            activeOpacity={1} 
-            onPress={() => setShowChatbot(false)}
-          />
-          <View style={styles.chatbotContainer}>
-            <View style={styles.chatbotHeader}>
-              <Text style={styles.chatbotHeaderText}>Gemini AI</Text>
-              <TouchableOpacity onPress={() => setShowChatbot(false)}>
-                <Text style={styles.closeButton}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              style={styles.chatbotContent}
-              data={currentChat?.messages || []}
-              renderItem={({ item }) => (
-                <View>
-                  {item.isUser ? (
-                    <Message message={item.text} />
-                  ) : (
-                    <Response prompt={item.text} prompt_img={generateHealthImage(item.text)} />
-                  )}
-                </View>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              ListFooterComponent={
-                <View style={styles.predefinedMessagesContainer}>
-                  {Object.entries(predefinedMessages).map(([key, value]) => (
-                    <TouchableOpacity 
-                      key={key} 
-                      style={styles.predefinedMessageButton}
-                      onPress={() => sendMessageToGemini(value)}
-                    >
-                      <Text style={styles.predefinedMessageText}>{key}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              }
-            />
-            <View style={styles.searchBar}>
-              <TextInput 
-                placeholder="Ask Gemini AI" 
-                style={styles.input} 
-                value={inputText} 
-                onChangeText={setInputText} 
-                selectionColor={"#323232"}
-              />
-              <TouchableOpacity onPress={handleSearchInput}>
-                <Image source={require("../assets/icons/right-arrow.png")} style={styles.icon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={createNewChat}>
-                <Image source={require("../assets/icons/plus.png")} style={styles.icon} />
-              </TouchableOpacity>
-            </View>
+  <>
+    <TouchableOpacity 
+      style={styles.overlay} 
+      activeOpacity={1} 
+      onPress={() => setShowChatbot(false)}
+    />
+    <View style={styles.chatbotContainer}>
+      <View style={styles.chatbotHeader}>
+        <Text style={styles.chatbotHeaderText}>Gemini AI</Text>
+        <TouchableOpacity onPress={() => setShowChatbot(false)}>
+          <Text style={styles.closeButton}>X</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        style={styles.chatbotContent}
+        data={currentChat?.messages || []}
+        renderItem={({ item }) => (
+          <View>
+            {item.isUser ? (
+              <Message message={item.text} />
+            ) : (
+              item.text.includes("1. Evalúa el riesgo cardiovascular del paciente, prestando especial atención a la presencia o ausencia de enfermedad cardíaca") ? (
+                <Response prompt={item.text} prompt_img={generateHealthImage(item.text)} />
+              ) : (
+                <Response prompt={item.text}prompt_img={"" }/>
+              )
+            )}
           </View>
-        </>
-      )}
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        ListFooterComponent={
+          <View style={styles.predefinedMessagesContainer}>
+            {Object.entries(predefinedMessages).map(([key, value]) => (
+              <TouchableOpacity 
+                key={key} 
+                style={styles.predefinedMessageButton}
+                onPress={() => sendMessageToGemini(value)}
+              >
+                <Text style={styles.predefinedMessageText}>{key}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        }
+      />
+      <View style={styles.searchBar}>
+        <TextInput 
+          placeholder="Ask Gemini AI" 
+          style={styles.input} 
+          value={inputText} 
+          onChangeText={setInputText} 
+          selectionColor={"#323232"}
+        />
+        <TouchableOpacity onPress={handleSearchInput}>
+          <Image source={require("../assets/icons/right-arrow.png")} style={styles.icon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={createNewChat}>
+          <Image source={require("../assets/icons/plus.png")} style={styles.icon} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  </>
+)}
+
           <TouchableOpacity 
       onPress={() => setShowChatbot(!showChatbot)} 
       style={styles.chatbotToggle}
