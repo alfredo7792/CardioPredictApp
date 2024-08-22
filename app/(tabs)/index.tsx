@@ -157,8 +157,12 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('indexConsultas', { id, age, sex });
   };
 
-  const handleConsulta = (id: number, age: number, sex: string) => {
-    navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
+  const handleConsulta = (id: number, age: number, sex: string, roleUser: string | undefined) => {
+    if(roleUser=="paciente"){
+      navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
+    }else{
+      navigation.navigate('index');
+    }
   };
 
   const handleChatBot = (id: number) => {
@@ -186,15 +190,19 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
           <Icon name="trash-outline" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
+        {item.role_name==="paciente" && (
+        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex, item.role_name)}>
           <Icon name="medkit-outline" size={20} color="white" />
         </TouchableOpacity>
+        )}
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
           <Icon name="chatbubble-ellipses-outline" size={20} color="white" />
         </TouchableOpacity>
+        {item.role_name==="paciente" && (
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
           <Icon name="eye-outline" size={20} color="white" />
         </TouchableOpacity>
+         )}
       </View>
     </View>
   );
