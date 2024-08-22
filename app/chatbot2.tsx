@@ -231,7 +231,7 @@ const Chatbot2 : React.FC = () => {
   const sendMessageToGemini = async (message: string) => {
     let fullMessage: string;
 
-    if (message === 'Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.') {
+    if (message === "Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.") {
       fullMessage = `
         Toma el rol de un médico especializado en cardiología. Tienes un paciente con la siguiente información:
   
@@ -370,16 +370,13 @@ function determineHealthStatus(analysisResult: string): string {
     labels.filter((_, index) => index % interval === 0);
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="auto" />
 
       <View style={styles.header}>
         <Image source={require("../assets/icons/robot.png")} style={styles.icon} />
         <Text style={styles.headerText}>Gemini AI</Text>
-        {/* {useAuth().user?.role} */}
-        <TouchableOpacity onPress={() => setShowChatbot(!showChatbot)} style={styles.chatbotToggle}>
-          <Text style={styles.chatbotToggleText}>{showChatbot ? "Hide Chatbot" : "Show Chatbot"}</Text>
-        </TouchableOpacity>
+
       </View>
 
       <View style={styles.dateFilters}>
@@ -409,7 +406,7 @@ function determineHealthStatus(analysisResult: string): string {
         />
       )}
 
-      <View style={styles.chartsContainer}>
+      <ScrollView style={styles.chartsContainer}>
         {filteredHistorial.length > 0 ? (
           <>
             {renderChart(
@@ -444,57 +441,40 @@ function determineHealthStatus(analysisResult: string): string {
         ) : (
           <Text style={styles.noDataMessage}>No data available for the selected date range.</Text>
         )}
-      </View>
+      </ScrollView>
 
       {showChatbot && (
-        <View style={styles.chatbotContainer}>
-          <FlatList
-            horizontal
-            data={chats}
-            renderItem={({ item }) => (
-              <View style={styles.chatItemContainer}>
-                <TouchableOpacity 
-                  style={[styles.chatItem, currentChatId === item.id && styles.selectedChatItem]}
-                  onPress={() => setCurrentChatId(item.id)}
-                >
-                  <Text style={styles.chatItemText}>{item.name}</Text>
-                  <TouchableOpacity onPress={() => showDeleteConfirmation(item.id)} style={styles.deleteButton}>
-                    <Text>x</Text>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              </View>
+  <>
+    <TouchableOpacity 
+      style={styles.overlay} 
+      activeOpacity={1} 
+      onPress={() => setShowChatbot(false)}
+    />
+    <View style={styles.chatbotContainer}>
+      <View style={styles.chatbotHeader}>
+        <Text style={styles.chatbotHeaderText}>Gemini AI</Text>
+        <TouchableOpacity onPress={() => setShowChatbot(false)}>
+          <Text style={styles.closeButton}>X</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        style={styles.chatbotContent}
+        data={currentChat?.messages || []}
+        renderItem={({ item }) => (
+          <View>
+            {item.isUser ? (
+              <Message message={item.text} />
+            ) : (
+              item.text.includes("1. Evalúa el riesgo cardiovascular del paciente, prestando especial atención a la presencia o ausencia de enfermedad cardíaca") ? (
+                <Response prompt={item.text} prompt_img={generateHealthImage(item.text)} />
+              ) : (
+                <Response prompt={item.text}prompt_img={"" }/>
+              )
             )}
-            keyExtractor={item => item.id.toString()}
-            style={styles.chatList}
-          />
-
-          <FlatList
-            style={styles.flatList}
-            data={currentChat?.messages || []}
-            renderItem={({ item }) => (
-              <View>
-                {item.isUser ? (
-                  <Message message={item.text} />
-                ) : (
-
-
-
-
-
-                  
-
-                  <Response prompt={item.text} prompt_img={generateHealthImage(item.text)} />
-
-
-
-
-
-                )}
-              </View>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        ListFooterComponent={
           <View style={styles.predefinedMessagesContainer}>
             {Object.entries(predefinedMessages).map(([key, value]) => (
               <TouchableOpacity 
@@ -506,24 +486,37 @@ function determineHealthStatus(analysisResult: string): string {
               </TouchableOpacity>
             ))}
           </View>
+        }
+      />
+      <View style={styles.searchBar}>
+        <TextInput 
+          placeholder="Ask Gemini AI" 
+          style={styles.input} 
+          value={inputText} 
+          onChangeText={setInputText} 
+          selectionColor={"#323232"}
+        />
+        <TouchableOpacity onPress={handleSearchInput}>
+          <Image source={require("../assets/icons/right-arrow.png")} style={styles.icon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={createNewChat}>
+          <Image source={require("../assets/icons/plus.png")} style={styles.icon} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  </>
+)}
 
-          <View style={styles.searchBar}>
-            <TextInput 
-              placeholder="Ask Gemini AI" 
-              style={styles.input} 
-              value={inputText} 
-              onChangeText={setInputText} 
-              selectionColor={"#323232"}
-            />
-            <TouchableOpacity onPress={handleSearchInput}>
-              <Image source={require("../assets/icons/right-arrow.png")} style={styles.icon} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={createNewChat}>
-              <Image source={require("../assets/icons/plus.png")} style={styles.icon} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+          <TouchableOpacity 
+      onPress={() => setShowChatbot(!showChatbot)} 
+      style={styles.chatbotToggle}
+    >
+      <Image 
+        source={require("../assets/icons/robot.png")} 
+        style={styles.chatbotToggleIcon} 
+      />
+    </TouchableOpacity>
+
       <Modal
         visible={showConfirmDelete}
         transparent={true}
@@ -538,11 +531,75 @@ function determineHealthStatus(analysisResult: string): string {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  chatbotToggle: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#007AFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  chatbotToggleIcon: {
+    width: 30,
+    height: 30,
+    tintColor: '#fff',
+  },
+  chatbotHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  chatbotHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  chatbotContent: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  searchBar: {
+    backgroundColor: "#ffffff",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 999,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -563,11 +620,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     color: "#323232",
-  },
-  chatbotToggle: {
-    backgroundColor: "#007AFF",
-    padding: 8,
-    borderRadius: 8,
   },
   chatbotToggleText: {
     color: "#FFFFFF",
@@ -593,11 +645,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   chatbotContainer: {
-    marginTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    paddingTop: 16,
-    marginLeft: 20,
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: '90%',
+    maxWidth: 400,
+    height: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1000,
+    flex: 1,
   },
   chatList: {
     maxHeight: 50,
@@ -631,18 +696,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: screenHeight * 0.6,
     marginBottom: 80,
-  },
-  searchBar: {
-    backgroundColor: "#ffffff",
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    gap: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
   },
   input: {
     backgroundColor: "#fff",
@@ -687,5 +740,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
 
 export default Chatbot2;
