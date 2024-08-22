@@ -19,55 +19,57 @@ const TabLayout: React.FC = () => {
           headerShown: false,
         }}
       >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="chatbot"
-        options={{
-          title: 'Chatbot',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="reports"
-        options={{
-          title: 'Reports',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart'} color={color} />
-          ),
-        }}
-      />
-      {/* Nueva pestaña para "Client Report" */}
-      <Tabs.Screen
-        name="client-report"
-        options={{
-          title: 'Client Report',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'briefcase' : 'briefcase-outline'} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
-  ) : (
-    <LoginScreen onLogin={login} />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+            ),
+          }}
+        />
+        {user.role === "paciente" && (
+          <Tabs.Screen
+            name="chatbot"
+            options={{
+              title: 'Chatbot',
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />
+              ),
+            }}
+          />
+        )}
+        <Tabs.Screen
+          name="reports"
+          options={{
+            title: 'Reports',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart'} color={color} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="client-report"
+          options={{
+            title: 'Client Report',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'briefcase' : 'briefcase-outline'} color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+    ) : (
+      <LoginScreen onLogin={login} />
     )
   );
 };

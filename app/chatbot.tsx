@@ -4,12 +4,11 @@ import { StatusBar } from "expo-status-bar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Response from "@/components/response";
 import Message from "@/components/message";
-import { useAuth } from './AuthContext';
+import { useAuth } from './(tabs)/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { BarChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { EXPO_API_URL } from './enviroment';
 
 const STORAGE_KEY = '@chat_history';
 const COUNTER_KEY = '@chat_counter';
@@ -131,16 +130,16 @@ const Chatbot : React.FC = () => {
         // const route = useRoute<any>();
         // const { clientId } = route.params; 
 
-        // var response = await fetch(`${EXPO_API_URL}/historial/${clientId}`);
-        var response = await fetch(`${EXPO_API_URL}/historial/`);
+        // var response = await fetch(`http://127.0.0.1:8000/historial/${clientId}`);
+        var response = await fetch(`http://127.0.0.1:8000/historial/`);
         if(user.role==="paciente"){
-          response = await fetch(`${EXPO_API_URL}/historial/${user.user_id}`);
+          response = await fetch(`http://127.0.0.1:8000/historial/${user.user_id}`);
         }
         else{
           const navigation = useNavigation<any>();
           const route = useRoute<any>();
           const { clientId } = route.params; 
-          response = await fetch(`${EXPO_API_URL}/historial/${user.user_id}`);
+          response = await fetch(`http://127.0.0.1:8000/historial/${user.user_id}`);
         }
 
   
@@ -371,7 +370,7 @@ function determineHealthStatus(analysisResult: string): string {
       <StatusBar style="auto" />
 
       <View style={styles.header}>
-        <Image source={require("../../assets/icons/robot.png")} style={styles.icon} />
+        <Image source={require("../assets/icons/robot.png")} style={styles.icon} />
         <Text style={styles.headerText}>Gemini AI</Text>
         {/* {useAuth().user?.role} */}
         <TouchableOpacity onPress={() => setShowChatbot(!showChatbot)} style={styles.chatbotToggle}>
@@ -513,10 +512,10 @@ function determineHealthStatus(analysisResult: string): string {
               selectionColor={"#323232"}
             />
             <TouchableOpacity onPress={handleSearchInput}>
-              <Image source={require("../../assets/icons/right-arrow.png")} style={styles.icon} />
+              <Image source={require("../assets/icons/right-arrow.png")} style={styles.icon} />
             </TouchableOpacity>
             <TouchableOpacity onPress={createNewChat}>
-              <Image source={require("../../assets/icons/plus.png")} style={styles.icon} />
+              <Image source={require("../assets/icons/plus.png")} style={styles.icon} />
             </TouchableOpacity>
           </View>
         </View>
