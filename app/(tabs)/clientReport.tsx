@@ -1,13 +1,18 @@
-// app/(tabs)/clientReport.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import { LineChart } from 'react-native-chart-kit';  // Asegúrate de instalar react-native-chart-kit
+import { LineChart } from 'react-native-chart-kit';
+
+interface Client {
+  id: string;
+  name: string;
+}
 
 const ClientReportComponent: React.FC = () => {
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  // Inicializa `selectedClient` como una cadena vacía
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<string>("");
   const [clientData, setClientData] = useState<any>(null);
 
   useEffect(() => {
@@ -110,6 +115,8 @@ const ClientReportComponent: React.FC = () => {
         onValueChange={(itemValue) => setSelectedClient(itemValue)}
         style={styles.picker}
       >
+        {/* Añadir un item por defecto */}
+        <Picker.Item label="Select a client" value="" />
         {clients.map((client) => (
           <Picker.Item key={client.id} label={client.name} value={client.id} />
         ))}
