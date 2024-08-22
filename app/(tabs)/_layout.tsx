@@ -40,28 +40,18 @@ const TabLayout: React.FC = () => {
       <Tabs.Screen
         name="chatbot"
         options={{
-          title: 'Chatbot(temporal)(Resultados)',
+          title: 'Chatbot',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="kpi"
-        options={{
-          title: 'KPI',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} />
-          ),
-        }}
-      /> */}
-      {/* Nueva pestaña para "Reports" */}
       <Tabs.Screen
         name="reports"
         options={{
           title: 'Reports',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'stats-chart' : 'document-text-outline'} color={color} />
+            <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart'} color={color} />
           ),
         }}
       />
