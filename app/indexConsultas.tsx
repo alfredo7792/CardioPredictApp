@@ -1,10 +1,11 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
-import { ActivityIndicator, ScrollView,View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
+import { ActivityIndicator, ScrollView, View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
 import moment from 'moment';
+import DateTimePicker from 'react-native-modal-datetime-picker';
 import { EXPO_API_URL } from "./(tabs)/enviroment";
+
 
 interface Revision {
   id: number;
@@ -17,7 +18,6 @@ interface Revision {
   date_created: string;
 }
 
-// Función para convertir segundos a formato hora
 const convertSecondsToTime = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -49,15 +49,16 @@ const convertTimeToSeconds = (time: string) => {
 };
 // ------------------------------------------------------------------------
 const IndexConsultas: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const route = useRoute<any>();
+  const { id, age, sex } = route.params;
+  const [dataResultados, setDataResultados] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
-  const route = useRoute<any>();
   const [newRevision, setNewRevision] = useState<Partial<Revision>>({});
-  const { id, age, sex } = route.params;
   const [isDeleteModal, setIsDeleteModal] = useState<boolean>(false);
   const [showEditModalRevision, setIsEditModal] = useState<boolean>(false);
-  const [isRevisionSaved, setIsRevisionSaved] = useState(false);
+  const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 
 
   const handleAnalyze = () => {
@@ -65,10 +66,10 @@ const IndexConsultas: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch(`${EXPO_API_URL}/results/${id}`)
+    fetch(`${EXPO_API_URL}/results/with_state_revision/${id}`)
       .then((response) => response.json())
       .then((json) => {
-        setData(json);
+        setDataResultados(json);
         setLoading(false);
       })
       .catch((error) => {
@@ -76,18 +77,6 @@ const IndexConsultas: React.FC = () => {
         setLoading(false);
       });
   }, [id]);
-
-  useEffect(() => {
-    fetch(`${EXPO_API_URL}/api/revision/by_result_id/${id}`)
-        .then((response) => response.json())
-        .then((data: Revision) => {
-          setIsRevisionSaved(true);
-        })
-        .catch((error) => {
-          console.error('Error fetching revision:', error);
-        });
-  }, []);
-
 
   if (loading) {
     return (
@@ -97,7 +86,6 @@ const IndexConsultas: React.FC = () => {
     );
   }
 
-
   const handleSave = async () => {
     try {
       const method = newRevision.id ? 'PUT' : 'POST';
@@ -106,7 +94,7 @@ const IndexConsultas: React.FC = () => {
         : `${EXPO_API_URL}/api/revision/save`;
 
       const body = {
-        results_id: newRevision.results_id || 1, 
+        results_id: newRevision.results_id || 1,
         start_time: convertSecondsToTimeForm24(newRevision.start_time || 0),
         end_time: convertSecondsToTimeForm24(newRevision.end_time || 0),
         diagnosis: newRevision.diagnosis || '',
@@ -130,42 +118,38 @@ const IndexConsultas: React.FC = () => {
     } finally {
       setIsEditModal(false);
       setNewRevision({});
-      setIsRevisionSaved(true);
     }
   };
   const formatHeartDisease = (value: number) => {
-    return value === 1 ? 'Enfermedad Cardiaca' : 'No posee';
+    return value === 1 ? 'Si Tiene' : 'No Tiene';
   };
-  
+
   const handleEditRevision = (idResult: number) => {
-      fetch(`${EXPO_API_URL}/api/revision/by_result_id/${idResult}`)
-        .then((response) => response.json())
-        .then((data: Revision) => {
-          setNewRevision(data);
-          setIsEditModal(true);
-          setIsRevisionSaved(true);
-        })
-        .catch((error) => {
-          console.error('Error fetching revision:', error);
-        });
-  };
-
-  const handleSaveRevision = (idResult: number ) => {
-      setNewRevision({
-        results_id: idResult,
-        start_time: 0,
-        end_time: 0,
-        diagnosis: '',
-        key_factors: '',
-        patient_status: 'LEVE',
-        date_created: new Date().toISOString(),
+    fetch(`${EXPO_API_URL}/api/revision/by_result_id/${idResult}`)
+      .then((response) => response.json())
+      .then((data: Revision) => {
+        setNewRevision(data);
+        setIsEditModal(true);
+      })
+      .catch((error) => {
+        console.error('Error fetching revision:', error);
       });
-      setIsEditModal(true);
-      setIsRevisionSaved(false);
-    
   };
 
-  const keys = ["id", "HeartDisease", "RiskPercentage", "dateRegistration"];
+  const handleSaveRevision = (idResult: number) => {
+    setNewRevision({
+      results_id: idResult,
+      start_time: 0,
+      end_time: 0,
+      diagnosis: '',
+      key_factors: '',
+      patient_status: 'LEVE',
+      date_created: new Date().toISOString(),
+    });
+    setIsEditModal(true);
+  };
+
+  const keys = ["id", "Enfermedad cardiaca", "Porcentaje de riesgo", "Fecha de registro"];
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
@@ -179,11 +163,11 @@ const IndexConsultas: React.FC = () => {
               <Text style={styles.tableHeaderText}>{key}</Text>
             </View>
           ))}
-          <View style={styles.tableHeaderCell}>
+          <View style={styles.tableHeaderCellAcciones}>
             <Text style={styles.tableHeaderText}>Acciones</Text>
           </View>
         </View>
-        {data.map((item, index) => (
+        {dataResultados.map((item, index) => (
           <View key={index} style={styles.tableRow}>
             <View style={styles.tableCell}>
               <Text style={styles.tableCellText}>{item.id}</Text>
@@ -209,16 +193,16 @@ const IndexConsultas: React.FC = () => {
               <TouchableOpacity style={styles.buttonView}>
                 <Text style={styles.buttonText}>Ver</Text>
               </TouchableOpacity>
-            {isRevisionSaved && (
-              <TouchableOpacity style={styles.buttonReview} onPress={() => handleEditRevision(item.id)}>
-                <Text style={styles.buttonText}>Ver Revision</Text>
-              </TouchableOpacity>
-            )}
-            {!isRevisionSaved && (
-              <TouchableOpacity style={styles.buttonReview} onPress={() => handleSaveRevision(item.id)}>
-                <Text style={styles.buttonText}>Revisar</Text>
-              </TouchableOpacity>
-            )}
+              {item.status_revision == 1 && (
+                <TouchableOpacity style={styles.buttonReview} onPress={() => handleEditRevision(item.id)}>
+                  <Text style={styles.buttonText}>Ver revision</Text>
+                </TouchableOpacity>
+              )}
+              {item.status_revision == 0 && (
+                <TouchableOpacity style={styles.buttonReview} onPress={() => handleSaveRevision(item.id)}>
+                  <Text style={styles.buttonText}>Revisar</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         ))}
@@ -233,7 +217,35 @@ const IndexConsultas: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>{newRevision.id ? 'Actualizar Revisión' : 'Nueva Revisión'}</Text>
-            <TextInput
+            <Button title="Seleccionar Hora de Inicio" onPress={() => setStartTimePickerVisible(true)} />
+
+            <DateTimePicker
+              isVisible={isStartTimePickerVisible}
+              mode="time"
+              onConfirm={(date) => {
+                setStartTimePickerVisible(false);
+                const timeInSeconds = convertTimeToSeconds(date.toLocaleTimeString());
+                setNewRevision({ ...newRevision, start_time: timeInSeconds });
+              }}
+              onCancel={() => setStartTimePickerVisible(false)}
+            />
+
+            {/* Botón para seleccionar la hora de fin */}
+            <Button title="Seleccionar Hora de Fin" onPress={() => setEndTimePickerVisible(true)} />
+
+            <DateTimePicker
+              isVisible={isEndTimePickerVisible}
+              mode="time"
+              onConfirm={(date) => {
+                setEndTimePickerVisible(false);
+                const timeInSeconds = convertTimeToSeconds(date.toLocaleTimeString());
+                setNewRevision({ ...newRevision, end_time: timeInSeconds });
+              }}
+              onCancel={() => setEndTimePickerVisible(false)}
+            />
+
+
+            {/* <TextInput
               style={styles.input}
               onChangeText={(text) => {
                 const formattedText = text;
@@ -252,7 +264,7 @@ const IndexConsultas: React.FC = () => {
               }}
               value={convertSecondsToTimeForm24(newRevision.end_time || 0)}
               keyboardType="numeric"
-            />
+            /> */}
             <TextInput
               style={styles.input}
               placeholder="Diagnóstico"
@@ -310,11 +322,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   container: {
-    padding: 20,
+    padding: 10,
+    justifyContent:'center',
     backgroundColor: '#f0f0f0',
   },
   table: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#ccc',
     borderRadius: 5,
     overflow: 'hidden',
@@ -329,6 +342,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   tableHeaderCell: {
+    flex: 0.5,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: '#e0e0e0',
+    borderRightWidth: 1,
+    borderRightColor: '#ccc',
+  },
+   tableHeaderCellAcciones: {
     flex: 1,
     paddingVertical: 15,
     paddingHorizontal: 10,
@@ -343,7 +364,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   tableCell: {
-    flex: 1,
+    flex: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 10,
@@ -355,7 +376,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   tableCellActions: {
-    flex: 2,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -387,13 +408,16 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-  },  
+  },
   analyzeButton: {
-    backgroundColor: '#FF6347',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: '#007BFF',
+    paddingVertical: 8, // Reducir el padding vertical
+    paddingHorizontal: 16, // Reducir el padding horizontal
     borderRadius: 5,
-  },  analyzeButtonText: {
+    alignSelf: 'flex-end', // Alinear a la derecha
+    marginBottom:8
+  },
+  analyzeButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
@@ -493,7 +517,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    textAlign:'center'
+    textAlign: 'center'
   },
   input: {
     borderWidth: 0.5,
