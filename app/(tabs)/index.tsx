@@ -35,7 +35,6 @@ const HomeScreen: React.FC = () => {
   const [dniFilter, setDniFilter] = useState<string>('');
   const navigation = useNavigation<any>();
 
-
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -157,14 +156,12 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('indexConsultas', { id, age, sex });
   };
 
-
-
   const handleConsulta = (id: number, age: number, sex: string) => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
   };
 
-  const handleChatBot= (id: number) => {
-    navigation.navigate('chatbot2', { clientId: id});
+  const handleChatBot = (id: number) => {
+    navigation.navigate('chatbot2', { clientId: id });
   };
 
   const filteredData = data.filter(user => {
@@ -173,8 +170,6 @@ const HomeScreen: React.FC = () => {
       (!dniFilter || user.DNI.toString().includes(dniFilter))
     );
   });
-
-
 
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
@@ -185,19 +180,19 @@ const HomeScreen: React.FC = () => {
 
       <View style={styles.tableActions}>
         <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
-          <Icon name="pencil-outline" size={24} color="white" />
+          <Icon name="pencil-outline" size={20} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
-          <Icon name="trash-outline" size={24} color="white" />
+          <Icon name="trash-outline" size={20} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
-          <Icon name="medkit-outline" size={24} color="white" />
+          <Icon name="medkit-outline" size={20} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
-          <Icon name="chatbubble-ellipses-outline" size={24} color="white" />
+          <Icon name="chatbubble-ellipses-outline" size={20} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
-          <Icon name="eye-outline" size={24} color="white" />
+          <Icon name="eye-outline" size={20} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -310,7 +305,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center', // Centra el texto de las cabeceras
+    textAlign: 'center',
   },
   tableRow: {
     flexDirection: 'row',
@@ -321,16 +316,21 @@ const styles = StyleSheet.create({
   tableCell: {
     flex: 1,
     color: '#333',
-    textAlign: 'center', // Centra el texto de las celdas
+    textAlign: 'center',
   },
   tableActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    flexWrap: 'wrap', // Permitir que los botones se envuelvan a la siguiente línea
+    gap: 10, // Espaciado entre los botones
     flex: 1,
   },
   actionButton: {
-    padding: 8,
+    padding: 10,
     borderRadius: 5,
+    minWidth: 50, // Tamaño mínimo para que el botón no se deforme
+    alignItems: 'center',
+    marginVertical: 5, // Espaciado vertical para evitar solapamiento en pantallas pequeñas
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -344,10 +344,10 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'center', // Centra el texto de los botones de acción
+    textAlign: 'center',
   },
   roleColumn: {
-    flex: 0.5, // Establece el ancho deseado para la columna "Role"
+    flex: 0.5,
   },
   button: {
     backgroundColor: '#007bff',
@@ -375,9 +375,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginHorizontal: 5,
   },
-  centerText: {
-    textAlign: 'center',
-  },
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
@@ -385,7 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '50%',
+    width: '80%',
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
@@ -405,10 +402,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    borderRadius: 5,
   },
   viewButton: {
-    backgroundColor: '#00CED1', // color del botón "Ver"
+    backgroundColor: '#00CED1',
   },
 });
 
