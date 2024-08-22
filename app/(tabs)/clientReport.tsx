@@ -1,8 +1,8 @@
 // app/(tabs)/clientReport.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, Picker, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
-import { LineChart } from 'react-native-chart-kit';  // Asegúrate de instalar react-native-chart-kit
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LineChart } from 'react-native-chart-kit'; // Asegúrate de instalar react-native-chart-kit
 
 const ClientReportComponent: React.FC = () => {
   const [clients, setClients] = useState([]);
@@ -104,15 +104,7 @@ const ClientReportComponent: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select a Client</Text>
-      <Picker
-        selectedValue={selectedClient}
-        onValueChange={(itemValue) => setSelectedClient(itemValue)}
-        style={styles.picker}
-      >
-        {clients.map((client) => (
-          <Picker.Item key={client.id} label={client.name} value={client.id} />
-        ))}
-      </Picker>
+   
 
       {clientData && (
         <View style={styles.clientReport}>

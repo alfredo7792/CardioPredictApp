@@ -1,7 +1,7 @@
 // app/(tabs)/kpi.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 const KPIComponent: React.FC = () => {
   const [diagnosisAccuracyRate, setDiagnosisAccuracyRate] = useState<number | null>(null);

@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { EXPO_API_URL } from './(tabs)/enviroment';
 
@@ -17,6 +17,7 @@ const EditFormUser: React.FC = () => {
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedSex, setSelectedSex] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -53,7 +54,29 @@ const EditFormUser: React.FC = () => {
     fetchRoles();
   }, [userId]);
 
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!userData?.first_name) errors.push('First name is required');
+    if (!userData?.last_name) errors.push('Last name is required');
+    if (!userData?.DNI || userData.DNI.length !== 8 || !/^\d+$/.test(userData.DNI)) errors.push('DNI must be exactly 8 numeric characters');
+    if (!userData?.age || parseInt(userData.age) <= 0) errors.push('Age must be a positive number');
+    if (!selectedSex) errors.push('Sex is required');
+    if (!userData?.username) errors.push('Username is required');
+    if (!userData?.email || !/\S+@\S+\.\S+/.test(userData.email)) errors.push('Invalid email address');
+    if (!selectedRole) errors.push('Role is required');
+
+    setErrorMessages(errors);
+
+    return errors.length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      Alert.alert('Validation Error', 'Please correct the highlighted errors.');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch(`${API_URL}/${userId}`, {
@@ -92,6 +115,7 @@ const EditFormUser: React.FC = () => {
           onChangeText={(text) => setUserData({ ...userData, first_name: text })}
           placeholder="Enter first name"
         />
+        {errorMessages.includes('First name is required') && <Text style={styles.errorText}>First name is required</Text>}
 
         <Text style={styles.label}>Last Name</Text>
         <TextInput
@@ -100,6 +124,7 @@ const EditFormUser: React.FC = () => {
           onChangeText={(text) => setUserData({ ...userData, last_name: text })}
           placeholder="Enter last name"
         />
+        {errorMessages.includes('Last name is required') && <Text style={styles.errorText}>Last name is required</Text>}
 
         <Text style={styles.label}>DNI</Text>
         <TextInput
@@ -107,7 +132,9 @@ const EditFormUser: React.FC = () => {
           value={userData?.DNI || ''}
           onChangeText={(text) => setUserData({ ...userData, DNI: text })}
           placeholder="Enter DNI"
+          keyboardType="numeric"
         />
+        {errorMessages.includes('DNI must be exactly 8 numeric characters') && <Text style={styles.errorText}>DNI must be exactly 8 numeric characters</Text>}
 
         <Text style={styles.label}>Age</Text>
         <TextInput
@@ -117,6 +144,7 @@ const EditFormUser: React.FC = () => {
           placeholder="Enter age"
           keyboardType="numeric"
         />
+        {errorMessages.includes('Age must be a positive number') && <Text style={styles.errorText}>Age must be a positive number</Text>}
 
         <Text style={styles.label}>Sex</Text>
         <View style={styles.pickerContainer}>
@@ -130,6 +158,7 @@ const EditFormUser: React.FC = () => {
             <Picker.Item label="Femenino" value="F" />
           </Picker>
         </View>
+        {errorMessages.includes('Sex is required') && <Text style={styles.errorText}>Sex is required</Text>}
 
         <Text style={styles.label}>Username</Text>
         <TextInput
@@ -138,6 +167,7 @@ const EditFormUser: React.FC = () => {
           onChangeText={(text) => setUserData({ ...userData, username: text })}
           placeholder="Enter username"
         />
+        {errorMessages.includes('Username is required') && <Text style={styles.errorText}>Username is required</Text>}
 
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -145,7 +175,9 @@ const EditFormUser: React.FC = () => {
           value={userData?.email || ''}
           onChangeText={(text) => setUserData({ ...userData, email: text })}
           placeholder="Enter email"
+          keyboardType="email-address"
         />
+        {errorMessages.includes('Invalid email address') && <Text style={styles.errorText}>Invalid email address</Text>}
 
         <Text style={styles.label}>Role</Text>
         <View style={styles.pickerContainer}>
@@ -160,6 +192,7 @@ const EditFormUser: React.FC = () => {
             ))}
           </Picker>
         </View>
+        {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
 
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
@@ -221,6 +254,10 @@ const styles = StyleSheet.create({
   picker: {
     height: 44,
     backgroundColor: '#f9f9f9',
+  },
+  errorText: {
+    color: '#f44336',
+    marginBottom: 16,
   },
   buttonsContainer: {
     flexDirection: 'row',

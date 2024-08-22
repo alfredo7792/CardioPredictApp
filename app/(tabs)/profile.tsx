@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
 import { EXPO_API_URL } from './enviroment';
-import Icon from 'react-native-vector-icons/Ionicons';
+
 
 interface Profile {
   id: number;
