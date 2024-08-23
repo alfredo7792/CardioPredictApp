@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { EXPO_API_URL } from './(tabs)/enviroment';
+import { useAuth } from './(tabs)/AuthContext';
 
 const API_URL = EXPO_API_URL + '/users';
 const ROLES_URL = EXPO_API_URL + '/roles';
@@ -18,6 +19,7 @@ const EditFormUser: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedSex, setSelectedSex] = useState<string | null>(null);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -84,7 +86,7 @@ const EditFormUser: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0') }),
+        body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0') , password : userData.password}),
       });
       if (!response.ok) {
         throw new Error('Error updating user data');
@@ -178,22 +180,35 @@ const EditFormUser: React.FC = () => {
           keyboardType="email-address"
         />
         {errorMessages.includes('Invalid email address') && <Text style={styles.errorText}>Invalid email address</Text>}
-
-        <Text style={styles.label}>Role</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedRole}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedRole(itemValue)}
-          >
-            <Picker.Item label="Select role" value={null} />
-            {roles.map((role) => (
-              <Picker.Item key={role.id} label={role.name} value={role.id} />
-            ))}
-          </Picker>
-        </View>
-        {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
-
+        
+        {(user?.role === 'admin' || user?.role === 'medico') ? (
+          <>
+            <Text style={styles.label}>Role</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedRole}
+                style={styles.picker}
+                onValueChange={(itemValue) => setSelectedRole(itemValue)}
+              >
+                <Picker.Item label="Select role" value={null} />
+                  {roles.map((role) => (
+                    user!=null ? 
+                      user.role === 'medico' ?
+                        Number(role.id)==3 ? 
+                          <Picker.Item key={role.id} label={role.name} value={role.id}/>
+                          :
+                          null
+                      : (
+                        <Picker.Item key={role.id} label={role.name} value={role.id} />
+                      )
+                    : null
+                  ))}
+                </Picker>
+            </View>
+            {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
+          </>
+        ) : null}
+        
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
             <Text style={styles.buttonText}>Update</Text>

@@ -59,16 +59,18 @@ const HomeScreen: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     if (user && roles.length > 0) {
-      setIsAdmin(user.role === 'admin');
-      setIsMedico(user.role === 'medico');
-      setIsPaciente(user.role === 'paciente');
-  
+      
+      
+      setIsAdmin(user.role == 'admin');
+      setIsMedico(user.role == 'medico');
+      setIsPaciente(user.role == 'paciente');
+
       try {
         let url = '';
         if (user.role === 'admin') {
           url = `${EXPO_API_URL}/users`;
         } else if (user.role === 'medico') {
-          url = `${EXPO_API_URL}/clients`;
+          url = `${EXPO_API_URL}/users/role/3`;
         } else if (user?.role === 'paciente') {
           url = `${EXPO_API_URL}/users/${user.user_id}`;
         }
@@ -202,24 +204,22 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
           <Icon name="pencil-outline" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
+        {isAdmin || isMedico && (
+          <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
           <Icon name="trash-outline" size={20} color="white" />
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}  
         {item.role_name==="paciente" && (
         <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex, item.role_name)}>
           <Icon name="medkit-outline" size={20} color="white" />
         </TouchableOpacity>
         )}
-        {isAdmin || isMedico || isPaciente && (
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
           <Icon name="chatbubble-ellipses-outline" size={20} color="white" />
         </TouchableOpacity>
-        )}
-        {isAdmin || isMedico || isPaciente && (
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
-          <Icon name="eye-outline" size={20} color="white" />
+            <Icon name="eye-outline" size={20} color="white" />
         </TouchableOpacity>
-         )}
       </View>
     </View>
   );
@@ -227,7 +227,7 @@ const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Bienvenido!</Text>
+        <Text style={styles.title}>Bienvenido {user?.username}!</Text>
         <HelloWave />
       </View>
       {(isAdmin || isMedico || isPaciente) && (
@@ -277,7 +277,8 @@ const HomeScreen: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Confirmar eliminación</Text>
-            <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
+            
+            <Text style={styles.modalMessage}>{user?.role=='admin' ? '¿Estás seguro de que quieres eliminar este usuario?': '¿Estás seguro de que quieres eliminar este paciente?'}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => setShowModal(false)}>
                 <Text style={styles.actionButtonText}>CANCELAR</Text>

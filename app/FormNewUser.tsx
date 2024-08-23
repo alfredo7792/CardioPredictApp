@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { EXPO_API_URL } from './(tabs)/enviroment';
+import { useAuth } from './(tabs)/AuthContext';
 
 const FormScreen: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -17,6 +18,7 @@ const FormScreen: React.FC = () => {
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -186,7 +188,16 @@ const FormScreen: React.FC = () => {
           >
             <Picker.Item label="Select a role" value="" />
             {roles.map((role) => (
-              <Picker.Item key={role.id} label={role.name} value={role.id} />
+              user!=null ? 
+                user.role === 'medico' ?
+                  Number(role.id)==3 ? 
+                    <Picker.Item key={role.id} label={role.name} value={role.id}/>
+                    :
+                    null
+                : (
+                  <Picker.Item key={role.id} label={role.name} value={role.id} />
+                )
+              : null
             ))}
           </Picker>
         </View>
