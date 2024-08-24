@@ -1,26 +1,25 @@
-// app/(tabs)/_layout.tsx
 import React from 'react';
-import { Tabs } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
 import { useAuth, AuthProvider } from './AuthContext';
 import LoginScreen from '../LoginScreen';
+import ReportsComponent from './reports';
+import Chatbot from '../chatbot';
 
-const TabLayout: React.FC = () => {
-  const colorScheme = useColorScheme();
+// Importa manualmente los tabs que deseas incluir
+import Profile from './profile';
+import Home from './index';
+
+const Tab = createBottomTabNavigator();
+
+function Tabs() {
   const { user, login } = useAuth();
-
   return (
     user ? (
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-          headerShown: false,
-        }}
-      >
-        <Tabs.Screen
-          name="index"
+    <Tab.Navigator>
+      <Tab.Screen
+          name="Home"
+          component={Home}
           options={{
             title: 'Home',
             tabBarIcon: ({ color, focused }) => (
@@ -28,8 +27,9 @@ const TabLayout: React.FC = () => {
             ),
           }}
         />
-        <Tabs.Screen
-          name="profile"
+      <Tab.Screen
+          name="Profile"
+          component={Profile}
           options={{
             title: 'Profile',
             tabBarIcon: ({ color, focused }) => (
@@ -38,8 +38,9 @@ const TabLayout: React.FC = () => {
           }}
         />
         {user.role === "paciente" && (
-          <Tabs.Screen
-            name="chatbot"
+          <Tab.Screen
+            name="Chatbot"
+            component={Chatbot}
             options={{
               title: 'Chatbot',
               tabBarIcon: ({ color, focused }) => (
@@ -48,36 +49,23 @@ const TabLayout: React.FC = () => {
             }}
           />
         )}
-        <Tabs.Screen
-          name="reports"
-          options={{
-            title: 'Reports',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart'} color={color} />
-            ),
-          }}
-        />
-
-        <Tabs.Screen
-          name="client-report"
-          options={{
-            title: 'Client Report',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'briefcase' : 'briefcase-outline'} color={color} />
-            ),
-          }}
-        />
-      </Tabs>
+      {user.role === "admin" && (
+          <Tab.Screen
+            name="Reports"
+            component={ReportsComponent}
+            options={{
+              title: 'Reports',
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart'} color={color} />
+              ),
+            }}
+          />
+        )}
+    </Tab.Navigator>
     ) : (
       <LoginScreen onLogin={login} />
     )
   );
-};
+}
 
-const App: React.FC = () => (
-  <AuthProvider>
-    <TabLayout />
-  </AuthProvider>
-);
-
-export default TabLayout;
+export default Tabs;
