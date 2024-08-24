@@ -74,7 +74,7 @@ const HomeScreen: React.FC = () => {
         } else if (user?.role === 'paciente') {
           url = `${EXPO_API_URL}/users/${user.user_id}`;
         }
-  
+
         if (url) {
           const response = await fetch(url);
           if (!response.ok) {
@@ -354,16 +354,17 @@ const styles = StyleSheet.create({
   tableActions: {
     flexDirection: 'row',
     justifyContent: 'center',
-    flexWrap: 'wrap', // Permitir que los botones se envuelvan a la siguiente línea
-    gap: 10, // Espaciado entre los botones
+    flexWrap: 'wrap', 
+    gap: 10, 
     flex: 1,
   },
   actionButton: {
-    padding: 10,
+    padding: 5,
     borderRadius: 5,
-    minWidth: 50, // Tamaño mínimo para que el botón no se deforme
+    minWidth: 20, 
     alignItems: 'center',
-    marginVertical: 5, // Espaciado vertical para evitar solapamiento en pantallas pequeñas
+    marginVertical: 3,
+    marginHorizontal: 0.2,
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -373,6 +374,12 @@ const styles = StyleSheet.create({
   },
   consultaButton: {
     backgroundColor: '#2196F3',
+  },
+  viewButton: {
+    backgroundColor: '#2196F3',
+  },
+  chatbotButton: {
+    backgroundColor: '#00CED1',
   },
   actionButtonText: {
     color: '#fff',
@@ -435,10 +442,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-  },
-  viewButton: {
-    backgroundColor: '#00CED1',
-  },
+  }
 });
 
 export default HomeScreen;
