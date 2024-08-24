@@ -1,8 +1,9 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
-import { ActivityIndicator, ScrollView, View, Text, TouchableOpacity, FlatList, TextInput, Modal, Button, StyleSheet } from 'react-native';
+import { ActivityIndicator, ScrollView, View, Text, TouchableOpacity, Alert, TextInput, Modal, Button, StyleSheet } from 'react-native';
 import moment from 'moment';
+import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { EXPO_API_URL } from "./(tabs)/enviroment";
 
@@ -54,12 +55,18 @@ const IndexConsultas: React.FC = () => {
   const [dataResultados, setDataResultados] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
-  const [newRevision, setNewRevision] = useState<Partial<Revision>>({});
+  const [newRevision, setNewRevision] = useState<Partial<Revision>>(
+    {
+      start_time: 0,
+      end_time: 0,
+    }
+  );
   const [isDeleteModal, setIsDeleteModal] = useState<boolean>(false);
   const [showEditModalRevision, setIsEditModal] = useState<boolean>(false);
   const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
   const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
-
+  const [startTime, setStartTime] = useState(''); // Para mostrar la hora de inicio en formato 12 horas
+  const [endTime, setEndTime] = useState(''); // Para mostrar la hora de fin en formato 12 horas
 
   const handleAnalyze = () => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
@@ -87,6 +94,12 @@ const IndexConsultas: React.FC = () => {
   }
 
   const handleSave = async () => {
+    if (newRevision.start_time !== undefined && newRevision.end_time !== undefined) {
+      if (newRevision.end_time <= newRevision.start_time) {
+        Alert.alert('Error', 'La hora de fin debe ser posterior a la hora de inicio');
+        return;
+      }
+    }
     try {
       const method = newRevision.id ? 'PUT' : 'POST';
       const url = newRevision.id
@@ -149,7 +162,7 @@ const IndexConsultas: React.FC = () => {
     setIsEditModal(true);
   };
 
-  const keys = ["id", "Enfermedad cardiaca", "Porcentaje de riesgo", "Fecha de registro"];
+  const keys = ["id", "Enfermedad cardiaca", "Porcentaje de riesgo"];
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
@@ -169,7 +182,7 @@ const IndexConsultas: React.FC = () => {
         </View>
         {dataResultados.map((item, index) => (
           <View key={index} style={styles.tableRow}>
-            <View style={styles.tableCell}>
+            <View style={styles.tableCellId}>
               <Text style={styles.tableCellText}>{item.id}</Text>
             </View>
             <View style={styles.tableCell}>
@@ -178,29 +191,29 @@ const IndexConsultas: React.FC = () => {
             <View style={styles.tableCell}>
               <Text style={styles.tableCellText}>{item.RiskPercentage}%</Text>
             </View>
-            <View style={styles.tableCell}>
+            {/* <View style={styles.tableCell}>
               <Text style={styles.tableCellText}>
                 {new Date(item.dateRegistration).toLocaleDateString()}
               </Text>
-            </View>
+            </View> */}
             <View style={styles.tableCellActions}>
               <TouchableOpacity style={styles.buttonEdit}>
-                <Text style={styles.buttonText}>Editar</Text>
+                <Icon name="pencil-outline" size={15} color="white" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonDelete}>
-                <Text style={styles.buttonText}>Eliminar</Text>
+                <Icon name="trash-outline" size={15} color="white" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonView}>
-                <Text style={styles.buttonText}>Ver</Text>
+                <Icon name="eye-outline" size={15} color="white" />
               </TouchableOpacity>
               {item.status_revision == 1 && (
-                <TouchableOpacity style={styles.buttonReview} onPress={() => handleEditRevision(item.id)}>
-                  <Text style={styles.buttonText}>Ver revision</Text>
+                <TouchableOpacity style={styles.buttonReviewNew} onPress={() => handleEditRevision(item.id)}>
+                  <Icon name="document-outline" size={15} color="yellow" />
                 </TouchableOpacity>
               )}
               {item.status_revision == 0 && (
-                <TouchableOpacity style={styles.buttonReview} onPress={() => handleSaveRevision(item.id)}>
-                  <Text style={styles.buttonText}>Revisar</Text>
+                <TouchableOpacity style={styles.buttonReviewEdit} onPress={() => handleSaveRevision(item.id)}>
+                  <Icon name="document-outline" size={15} color="white" />
                 </TouchableOpacity>
               )}
             </View>
@@ -208,6 +221,7 @@ const IndexConsultas: React.FC = () => {
         ))}
       </View>
 
+      {/* Modal para ver revisiones */}
       <Modal
         transparent={true}
         visible={showEditModalRevision && !isDeleteModal}
@@ -217,8 +231,12 @@ const IndexConsultas: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>{newRevision.id ? 'Actualizar Revisión' : 'Nueva Revisión'}</Text>
-            <Button title="Seleccionar Hora de Inicio" onPress={() => setStartTimePickerVisible(true)} />
-
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setStartTimePickerVisible(true)}
+            >
+              <Text style={styles.buttonText}>{`Hora Inicio: ${startTime ? startTime : 'Seleccionar'}`}</Text>
+            </TouchableOpacity>
             <DateTimePicker
               isVisible={isStartTimePickerVisible}
               mode="time"
@@ -226,56 +244,49 @@ const IndexConsultas: React.FC = () => {
                 setStartTimePickerVisible(false);
                 const timeInSeconds = convertTimeToSeconds(date.toLocaleTimeString());
                 setNewRevision({ ...newRevision, start_time: timeInSeconds });
+                setStartTime(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
               }}
               onCancel={() => setStartTimePickerVisible(false)}
             />
 
-            {/* Botón para seleccionar la hora de fin */}
-            <Button title="Seleccionar Hora de Fin" onPress={() => setEndTimePickerVisible(true)} />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setEndTimePickerVisible(true)}
+            >
+              <Text style={styles.buttonText}>{`Hora Fin: ${endTime ? endTime : 'Seleccionar'}`}</Text>
+            </TouchableOpacity>
 
             <DateTimePicker
               isVisible={isEndTimePickerVisible}
               mode="time"
               onConfirm={(date) => {
+                const endTimeInSeconds = convertTimeToSeconds(date.toLocaleTimeString());
+                if (newRevision.start_time !== undefined && endTimeInSeconds <= newRevision.start_time) {
+                  Alert.alert('Error', 'La hora de fin debe ser posterior a la hora de inicio');
+                  setEndTimePickerVisible(false);
+                  return;
+                }
                 setEndTimePickerVisible(false);
-                const timeInSeconds = convertTimeToSeconds(date.toLocaleTimeString());
-                setNewRevision({ ...newRevision, end_time: timeInSeconds });
+                setNewRevision({ ...newRevision, end_time: endTimeInSeconds });
+                setEndTime(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
               }}
               onCancel={() => setEndTimePickerVisible(false)}
             />
-
-
-            {/* <TextInput
-              style={styles.input}
-              onChangeText={(text) => {
-                const formattedText = text;
-                const timeInSeconds = convertTimeToSeconds(formattedText);
-                setNewRevision({ ...newRevision, start_time: timeInSeconds });
-              }}
-              value={convertSecondsToTimeForm24(newRevision.start_time || 0)}
-              keyboardType="numeric"
-            />
             <TextInput
               style={styles.input}
-              onChangeText={(text) => {
-                const formattedText = text;
-                const timeInSeconds = convertTimeToSeconds(formattedText);
-                setNewRevision({ ...newRevision, end_time: timeInSeconds });
-              }}
-              value={convertSecondsToTimeForm24(newRevision.end_time || 0)}
-              keyboardType="numeric"
-            /> */}
-            <TextInput
-              style={styles.input}
-              placeholder="Diagnóstico"
+              placeholder="Escribir Diagnóstico..."
               onChangeText={(text) => setNewRevision({ ...newRevision, diagnosis: text })}
               value={newRevision.diagnosis}
+              multiline={true}
+              numberOfLines={4}
             />
             <TextInput
               style={styles.input}
-              placeholder="Factores Clave"
+              placeholder="Listar los factores..."
               onChangeText={(text) => setNewRevision({ ...newRevision, key_factors: text })}
               value={newRevision.key_factors}
+              multiline={true}
+              numberOfLines={4}
             />
             <Picker
               selectedValue={newRevision.patient_status || 'LEVE'}
@@ -287,8 +298,8 @@ const IndexConsultas: React.FC = () => {
               <Picker.Item label="Grave" value="GRAVE" />
             </Picker>
             <View style={styles.modalButtons}>
-              <Button title="Guardar" onPress={handleSave} color="blue" />
               <Button title="Cancelar" onPress={() => setIsEditModal(false)} color="red" />
+              <Button title="Guardar" onPress={handleSave} color="blue" />
             </View>
           </View>
         </View>
@@ -323,8 +334,18 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 10,
-    justifyContent:'center',
+    justifyContent: 'center',
     backgroundColor: '#f0f0f0',
+  },
+  button: {
+    backgroundColor: 'white',
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 10,
+    width: '100%',
+    alignItems: 'center',
   },
   table: {
     borderWidth: 1.5,
@@ -349,7 +370,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#ccc',
   },
-   tableHeaderCellAcciones: {
+  tableHeaderCellAcciones: {
     flex: 1,
     paddingVertical: 15,
     paddingHorizontal: 10,
@@ -365,6 +386,13 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     flex: 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 2,
+  },
+  tableCellId: {
+    flex: 0.1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 10,
@@ -399,14 +427,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
   },
-  buttonReview: {
-    backgroundColor: '#2111F9',
+  buttonReviewEdit: {
+    backgroundColor: '#2FF1F9',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buttonReviewNew: {
+    backgroundColor: '#211100',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
   },
   analyzeButton: {
@@ -415,7 +449,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, // Reducir el padding horizontal
     borderRadius: 5,
     alignSelf: 'flex-end', // Alinear a la derecha
-    marginBottom:8
+    marginBottom: 8
   },
   analyzeButtonText: {
     color: '#fff',
@@ -424,7 +458,6 @@ const styles = StyleSheet.create({
   },
 
   // ------revisiones
-
   tableContainer: {
     width: '80%',
     alignSelf: 'center',
@@ -459,10 +492,10 @@ const styles = StyleSheet.create({
     width: 100, // Ajusta el ancho del botón según sea necesario
   },
   saveButton: {
-    backgroundColor: '#4CAF50', // Color de fondo para el botón de guardar
+    backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#f44336', // Color de fondo para el botón de cancelar
+    backgroundColor: '#f44336',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -503,10 +536,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '50%',
+    width: '90%',
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 20,
+    padding: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -520,12 +553,14 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   input: {
-    borderWidth: 0.5,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
+    marginVertical: 10,
     backgroundColor: '#fff',
+    height: 100, // Ajusta la altura según sea necesario
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 10,
+    textAlignVertical: 'top',
   },
   picker: {
     borderWidth: 1,
@@ -536,6 +571,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   modalButtons: {
+    borderRadius: 25,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
