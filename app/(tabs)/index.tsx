@@ -227,7 +227,7 @@ const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Bienvenido {user?.username}!</Text>
+        <Text style={styles.title}>Bienvenido {user?.role} {user?.username}!</Text>
         <HelloWave />
       </View>
       {(isAdmin || isMedico || isPaciente) && (
