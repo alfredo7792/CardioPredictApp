@@ -1,9 +1,12 @@
 import { HelloWave } from '@/components/HelloWave';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './AuthContext';
 import { EXPO_API_URL } from './enviroment';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 interface User {
   id: number;
@@ -27,13 +30,13 @@ const HomeScreen: React.FC = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isMedico, setIsMedico] = useState<boolean>(false);
+  const [isPaciente, setIsPaciente] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [lastNameFilter, setLastNameFilter] = useState<string>('');
   const [dniFilter, setDniFilter] = useState<string>('');
   const navigation = useNavigation<any>();
-
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -52,41 +55,54 @@ const HomeScreen: React.FC = () => {
     fetchRoles();
   }, []);
 
-  useEffect(() => {
+  
+
+  const fetchData = useCallback(async () => {
     if (user && roles.length > 0) {
-      setIsAdmin(user.role === 'admin');
-      setIsMedico(user.role === 'medico');
+      
+      
+      setIsAdmin(user.role == 'admin');
+      setIsMedico(user.role == 'medico');
+      setIsPaciente(user.role == 'paciente');
 
-      const fetchData = async () => {
-        try {
-          let url = '';
-          if (user.role === 'admin') {
-            url = `${EXPO_API_URL}/users`;
-          } else if (user.role === 'medico') {
-            url = `${EXPO_API_URL}/clients`;
+      try {
+        let url = '';
+        if (user.role === 'admin') {
+          url = `${EXPO_API_URL}/users`;
+        } else if (user.role === 'medico') {
+          url = `${EXPO_API_URL}/users/role/3`;
+        } else if (user?.role === 'paciente') {
+          url = `${EXPO_API_URL}/users/${user.user_id}`;
+        }
+
+        if (url) {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`Error fetching data from ${url}`);
           }
-
-          if (url) {
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`Error fetching data from ${url}`);
-            }
-            const result = await response.json();
+          const result = await response.json();
+          if (isAdmin || isMedico) {
             const usersWithRoles = result.map((user: User) => {
               const role = roles.find(role => role.id === user.role_id);
               return { ...user, role_name: role?.name || 'Unknown' };
             });
             setData(usersWithRoles);
+          } else if (isPaciente) {
+            const dataArray = Array.isArray(result) ? result : [result];
+            setData(dataArray);
           }
-        } catch (error) {
-          console.error('Error fetching data:', error);
         }
-      };
-
-      fetchData();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     }
-  }, [user, roles]);
-
+  }, [user, roles, isAdmin, isMedico, isPaciente]);
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
   const handleEdit = (id: number) => {
     navigation.navigate('editFormUser', { userId: id });
   };
@@ -116,8 +132,10 @@ const HomeScreen: React.FC = () => {
             let fetchUrl = '';
             if (user?.role === 'admin') {
               fetchUrl = `${EXPO_API_URL}/users`;
-            } else if (user?.role === 'medico') {
+            } else if (isMedico) {
               fetchUrl = `${EXPO_API_URL}/clients`;
+            } else if (user?.role === 'paciente') {
+              fetchUrl = `${EXPO_API_URL}/users/${user.user_id}`;
             }
 
             if (fetchUrl) {
@@ -156,10 +174,12 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('indexConsultas', { id, age, sex });
   };
 
-
-  
-  const handleConsulta = (id: number, age: number, sex: string) => {
+  const handleConsulta = (id: number, age: number, sex: string, roleUser: string | undefined) => {
     navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
+  };
+
+  const handleChatBot = (id: number) => {
+    navigation.navigate('chatbot2', { clientId: id });
   };
 
   const filteredData = data.filter(user => {
@@ -169,28 +189,37 @@ const HomeScreen: React.FC = () => {
     );
   });
 
-  
-
   const renderItem = ({ item }: { item: User }) => (
     <View style={styles.tableRow}>
-      <Text style={styles.tableCell}>{item.DNI}</Text>
-      <Text style={styles.tableCell}>{item.first_name} {item.last_name}</Text>
-      <Text style={styles.tableCell}>{item.email}</Text>
-      {isAdmin && <Text style={styles.tableCell}>{item.role_name}</Text>}
+      <Text style={[styles.tableCell, styles.roleColumn]}>{item.DNI}</Text>
+      <Text style={[styles.tableCell, styles.roleColumn]}>{item.first_name} {item.last_name}</Text>
+      {/* <Text style={[styles.tableCell, styles.roleColumn]}>{item.email}</Text> */}
+      {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>{item.role_name}</Text>}
+
       <View style={styles.tableActions}>
         <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => handleEdit(item.id)}>
-          <Text style={styles.actionButtonText}>Actualizar</Text>
+          <Icon name="pencil-outline" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
-          <Text style={styles.actionButtonText}>Eliminar</Text>
+        {(isAdmin||isMedico) && (
+          <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => confirmDelete(item.id)}>
+          <Icon name="trash-outline" size={20} color="white" />
+          </TouchableOpacity>
+        )}  
+        {(isMedico||isPaciente) && (
+        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex, item.role_name)}>
+          <Icon name="medkit-outline" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Consultas</Text>
+        )}
+        {(isMedico||isPaciente) && (
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
+          <Icon name="chatbubble-ellipses-outline" size={20} color="white" />
         </TouchableOpacity>
-
+        )}
+        {(isMedico) && (
         <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
-          <Text style={styles.actionButtonText}>Ver</Text>
+            <Icon name="eye-outline" size={20} color="white" />
         </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -198,15 +227,17 @@ const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Bienvenido!</Text>
+        <Text style={styles.title}>Bienvenido {user?.role} {user?.username}!</Text>
         <HelloWave />
       </View>
-      {(isAdmin || isMedico) && (
+      {(isAdmin || isMedico || isPaciente) && (
         <View style={styles.tableContainer}>
-          <Text style={styles.subtitle}>{isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
+          <Text style={styles.subtitle}>{isPaciente ? 'Paciente' : isAdmin ? 'Lista de usuarios' : 'Lista de clientes'}</Text>
+          {(isAdmin || isMedico) && (
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FormNewUser')}>
             <Text style={styles.buttonText}>Nuevo</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>)}
+          {(isAdmin || isMedico) && (
           <View style={styles.filtersContainer}>
             <TextInput
               style={styles.filterInput}
@@ -221,12 +252,12 @@ const HomeScreen: React.FC = () => {
               onChangeText={setDniFilter}
               keyboardType="numeric"
             />
-          </View>
+          </View>)}
           <View style={styles.tableHeader}>
-          <Text style={styles.headerCell}>DNI</Text>
-            <Text style={styles.headerCell}>Name</Text>
-            <Text style={styles.headerCell}>Email</Text>
-            {isAdmin && <Text style={styles.headerCell}>Role</Text>}
+            <Text style={[styles.tableCell, styles.roleColumn]}>DNI</Text>
+            <Text style={[styles.tableCell, styles.roleColumn]}>Name</Text>
+            {/* <Text style={[styles.tableCell, styles.roleColumn]}>Email</Text> */}
+            {isAdmin && <Text style={[styles.tableCell, styles.roleColumn]}>Role</Text>}
             <Text style={styles.headerCell}>Acciones</Text>
           </View>
           <FlatList
@@ -246,7 +277,8 @@ const HomeScreen: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Confirmar eliminación</Text>
-            <Text style={styles.modalMessage}>¿Estás seguro de que quieres eliminar este usuario?</Text>
+            
+            <Text style={styles.modalMessage}>{user?.role=='admin' ? '¿Estás seguro de que quieres eliminar este usuario?': '¿Estás seguro de que quieres eliminar este paciente?'}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => setShowModal(false)}>
                 <Text style={styles.actionButtonText}>CANCELAR</Text>
@@ -258,10 +290,6 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-
-      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ConsultasScreen')}>
-        <Text style={styles.buttonText}>Consultas</Text>
-      </TouchableOpacity> */}
     </View>
   );
 };
@@ -272,6 +300,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
     padding: 16,
+    paddingBottom: 80,
   },
   titleContainer: {
     alignItems: 'center',
@@ -290,10 +319,13 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     width: '100%',
+    maxHeight: '90%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
     elevation: 3,
+    overflow: 'hidden',
+    margin: 0,
   },
   tableHeader: {
     flexDirection: 'row',
@@ -306,7 +338,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center', // Centra el texto de las cabeceras
+    textAlign: 'center',
   },
   tableRow: {
     flexDirection: 'row',
@@ -317,16 +349,22 @@ const styles = StyleSheet.create({
   tableCell: {
     flex: 1,
     color: '#333',
-    textAlign: 'center', // Centra el texto de las celdas
+    textAlign: 'center',
   },
   tableActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    flexWrap: 'wrap', 
+    gap: 10, 
     flex: 1,
   },
   actionButton: {
-    padding: 8,
+    padding: 5,
     borderRadius: 5,
+    minWidth: 20, 
+    alignItems: 'center',
+    marginVertical: 3,
+    marginHorizontal: 0.2,
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -337,10 +375,19 @@ const styles = StyleSheet.create({
   consultaButton: {
     backgroundColor: '#2196F3',
   },
+  viewButton: {
+    backgroundColor: '#2196F3',
+  },
+  chatbotButton: {
+    backgroundColor: '#00CED1',
+  },
   actionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'center', // Centra el texto de los botones de acción
+    textAlign: 'center',
+  },
+  roleColumn: {
+    flex: 0.5,
   },
   button: {
     backgroundColor: '#007bff',
@@ -368,9 +415,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginHorizontal: 5,
   },
-  centerText: {
-    textAlign: 'center',
-  },
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
@@ -378,7 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '50%',
+    width: '80%',
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
@@ -398,11 +442,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    borderRadius: 5,
-  },
-  viewButton: {
-    backgroundColor: '#00CED1', // color del botón "Ver"
-  },
+  }
 });
 
 export default HomeScreen;

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image,ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from './AuthContext'; // Asegúrate de que la ruta sea correcta
 import { EXPO_API_URL } from './enviroment';
-import Icon from 'react-native-vector-icons/Ionicons';
+
 
 interface Profile {
   id: number;
@@ -78,7 +79,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.profileHeader}>
         <Image
           style={styles.avatar}
@@ -127,7 +128,7 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -135,6 +136,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f4f4',
+    justifyContent: 'space-between', // Asegúrate de que los elementos estén distribuidos correctamente
+  },
+  scrollViewContent: {
     padding: 20,
   },
   profileHeader: {
@@ -192,6 +196,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
     borderRadius: 15,
     alignItems: 'center',
+    marginHorizontal: 20, // Agrega margen horizontal para separarlo de los bordes de la pantalla
+    marginBottom: 20, // Asegúrate de que no esté pegado al borde inferior
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },

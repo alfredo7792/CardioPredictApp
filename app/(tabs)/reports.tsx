@@ -1,9 +1,8 @@
 // app/(tabs)/reports.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
-import { BarChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { EXPO_API_URL } from "./enviroment";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -18,12 +17,12 @@ const ReportsComponent: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const diagnosisResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-accuracy-rate/');
-        const severeResponse = await axios.get('http://127.0.0.1:8000/kpi/severe-case-reduction-rate/');
-        const timeResponse = await axios.get('http://127.0.0.1:8000/kpi/diagnosis-time-reduction-rate/');
-        const userCountResponse = await axios.get('http://127.0.0.1:8000/users/count');
-        const doctorCountResponse = await axios.get('http://127.0.0.1:8000/doctors/count');
-        const patientsDetectedResponse = await axios.get('http://127.0.0.1:8000/patients/detected/count');
+        const diagnosisResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-accuracy-rate/`);
+        const severeResponse = await axios.get(`${EXPO_API_URL}/kpi/severe-case-reduction-rate/`);
+        const timeResponse = await axios.get(`${EXPO_API_URL}/kpi/diagnosis-time-reduction-rate/`);
+        const userCountResponse = await axios.get(`${EXPO_API_URL}/users/count`);
+        const doctorCountResponse = await axios.get(`${EXPO_API_URL}/doctors/count`);
+        const patientsDetectedResponse = await axios.get(`${EXPO_API_URL}/patients/detected/count`);
 
         setDiagnosisAccuracyRate(diagnosisResponse.data);
         setSevereCaseReductionRate(severeResponse.data);
@@ -62,34 +61,7 @@ const ReportsComponent: React.FC = () => {
             {renderKPI('Diagnosis Time Reduction Rate', diagnosisTimeReductionRate, 3)}
           </View>
           <Text style={styles.reportTitle}>User and Doctor Statistics</Text>
-          <BarChart
-            data={{
-              labels: ['Users', 'Doctors', 'Patients Detected'],
-              datasets: [
-                {
-                  data: [userCount || 0, doctorCount || 0, patientsDetected || 0],
-                },
-              ],
-            }}
-            width={screenWidth - 40}
-            height={220}
-            yAxisLabel=""
-            chartConfig={{
-              backgroundColor: '#e26a00',
-              backgroundGradientFrom: '#fb8c00',
-              backgroundGradientTo: '#ffa726',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-            }}
-          />
+       
         </>
       )}
     </ScrollView>

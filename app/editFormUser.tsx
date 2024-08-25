@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { EXPO_API_URL } from './(tabs)/enviroment';
+import { useAuth } from './(tabs)/AuthContext';
 
 const API_URL = EXPO_API_URL + '/users';
+const API_URL_PASSWORD = EXPO_API_URL + '/usersPassword';
 const ROLES_URL = EXPO_API_URL + '/roles';
 
 const EditFormUser: React.FC = () => {
@@ -18,6 +20,8 @@ const EditFormUser: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedSex, setSelectedSex] = useState<string | null>(null);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [newPassword, setNewPassword] = useState<string>(''); // Estado separado para la nueva contraseña
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -65,6 +69,7 @@ const EditFormUser: React.FC = () => {
     if (!userData?.username) errors.push('Username is required');
     if (!userData?.email || !/\S+@\S+\.\S+/.test(userData.email)) errors.push('Invalid email address');
     if (!selectedRole) errors.push('Role is required');
+    if (!userData?.phone) errors.push('Phone number is required');
 
     setErrorMessages(errors);
 
@@ -79,13 +84,44 @@ const EditFormUser: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const response = await fetch(`${API_URL}/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0') }),
-      });
+      // Prepare the user data to be sent
+      var updatedUserData;
+      if (newPassword.trim() !== '') {
+        updatedUserData = {
+          ...userData,
+          sex: selectedSex,
+          role_id: parseInt(selectedRole || '0'),
+          phone: userData.phone,
+          password: newPassword
+        };
+      } else {
+        updatedUserData = {
+          ...userData,
+          sex: selectedSex,
+          role_id: parseInt(selectedRole || '0'),
+          phone: userData.phone
+        };
+      }
+      
+      var response;
+      if (newPassword.trim() !== '') {
+        response = await fetch(`${API_URL_PASSWORD}/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedUserData),
+        });
+      } else {
+        response = await fetch(`${API_URL}/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedUserData),
+        });
+      }
+
       if (!response.ok) {
         throw new Error('Error updating user data');
       }
@@ -178,26 +214,49 @@ const EditFormUser: React.FC = () => {
           keyboardType="email-address"
         />
         {errorMessages.includes('Invalid email address') && <Text style={styles.errorText}>Invalid email address</Text>}
+        
+        {(user?.role === 'admin' || user?.role === 'medico') ? (
+          <>
+            <Text style={styles.label}>Role</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedRole}
+                style={styles.picker}
+                onValueChange={(itemValue) => setSelectedRole(itemValue)}
+              >
+                <Picker.Item label="Select role" value={null} />
+                {roles.map((role) => (
+                  <Picker.Item key={role.id} label={role.name} value={role.id} />
+                ))}
+              </Picker>
+            </View>
+            {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
+          </>
+        ) : null}
 
-        <Text style={styles.label}>Role</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedRole}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedRole(itemValue)}
-          >
-            <Picker.Item label="Select role" value={null} />
-            {roles.map((role) => (
-              <Picker.Item key={role.id} label={role.name} value={role.id} />
-            ))}
-          </Picker>
-        </View>
-        {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          value={userData?.phone || ''}
+          onChangeText={(text) => setUserData({ ...userData, phone: text })}
+          placeholder="Enter phone number"
+          keyboardType="phone-pad"
+        />
+        {errorMessages.includes('Phone number is required') && <Text style={styles.errorText}>Phone number is required</Text>}
 
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
-            <Text style={styles.buttonText}>Update</Text>
-          </TouchableOpacity>
+        <Text style={styles.label}>New Password (optional)</Text>
+        <TextInput
+          style={styles.input}
+          value={newPassword}
+          onChangeText={(text) => setNewPassword(text)}
+          placeholder="Enter new password"
+          secureTextEntry
+        />
+
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => navigation.goBack()}>
             <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
           </TouchableOpacity>
