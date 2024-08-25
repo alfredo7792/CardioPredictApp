@@ -20,6 +20,7 @@ const EditFormUser: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedSex, setSelectedSex] = useState<string | null>(null);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [newPassword, setNewPassword] = useState<string>(''); // Estado separado para la nueva contraseña
   const { user } = useAuth();
 
   useEffect(() => {
@@ -68,6 +69,7 @@ const EditFormUser: React.FC = () => {
     if (!userData?.username) errors.push('Username is required');
     if (!userData?.email || !/\S+@\S+\.\S+/.test(userData.email)) errors.push('Invalid email address');
     if (!selectedRole) errors.push('Role is required');
+    if (!userData?.phone) errors.push('Phone number is required');
 
     setErrorMessages(errors);
 
@@ -82,34 +84,44 @@ const EditFormUser: React.FC = () => {
 
     setIsSaving(true);
     try {
-
+      // Prepare the user data to be sent
+      var updatedUserData;
+      if (newPassword.trim() !== '') {
+        updatedUserData = {
+          ...userData,
+          sex: selectedSex,
+          role_id: parseInt(selectedRole || '0'),
+          phone: userData.phone,
+          password: newPassword
+        };
+      } else {
+        updatedUserData = {
+          ...userData,
+          sex: selectedSex,
+          role_id: parseInt(selectedRole || '0'),
+          phone: userData.phone
+        };
+      }
+      
       var response;
-      if(userData.password=!''){
-        console.log("hola");
-        response = await fetch(`${API_URL}Password/${userId}`, {
+      if (newPassword.trim() !== '') {
+        response = await fetch(`${API_URL_PASSWORD}/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            ...userData,
-            sex: selectedSex,
-            role_id: parseInt(selectedRole || '0'),
-            phone: userData.phone,
-          }),
+          body: JSON.stringify(updatedUserData),
         });
-      }
-      else{
-        console.log("hola2");
+      } else {
         response = await fetch(`${API_URL}/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0')}),
+          body: JSON.stringify(updatedUserData),
         });
       }
-      
+
       if (!response.ok) {
         throw new Error('Error updating user data');
       }
@@ -213,25 +225,16 @@ const EditFormUser: React.FC = () => {
                 onValueChange={(itemValue) => setSelectedRole(itemValue)}
               >
                 <Picker.Item label="Select role" value={null} />
-                  {roles.map((role) => (
-                    user!=null ? 
-                      user.role === 'medico' ?
-                        Number(role.id)==3 ? 
-                          <Picker.Item key={role.id} label={role.name} value={role.id}/>
-                          :
-                          null
-                      : (
-                        <Picker.Item key={role.id} label={role.name} value={role.id} />
-                      )
-                    : null
-                  ))}
+                {roles.map((role) => (
+                  <Picker.Item key={role.id} label={role.name} value={role.id} />
+                ))}
               </Picker>
             </View>
             {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
           </>
         ) : null}
-        
-        <Text style={styles.label}>Phone</Text>
+
+        <Text style={styles.label}>Phone Number</Text>
         <TextInput
           style={styles.input}
           value={userData?.phone || ''}
@@ -239,16 +242,18 @@ const EditFormUser: React.FC = () => {
           placeholder="Enter phone number"
           keyboardType="phone-pad"
         />
-        
-        <Text style={styles.label}>Password (optional)</Text>
+        {errorMessages.includes('Phone number is required') && <Text style={styles.errorText}>Phone number is required</Text>}
+
+        <Text style={styles.label}>New Password (leave empty if not changing)</Text>
         <TextInput
           style={styles.input}
+          value={newPassword}
+          onChangeText={(text) => setNewPassword(text)}
+          placeholder="Enter new password"
           secureTextEntry
-          value={userData?.password || ''}
-          onChangeText={(text) => setUserData({ ...userData, password: text })}
-          placeholder="Enter new password (optional)"
         />
-        <View style={styles.buttonsContainer}>
+
+          <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
               <Text style={styles.buttonText}>Update</Text>
             </TouchableOpacity>
