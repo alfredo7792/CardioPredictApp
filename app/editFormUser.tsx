@@ -244,7 +244,7 @@ const EditFormUser: React.FC = () => {
         />
         {errorMessages.includes('Phone number is required') && <Text style={styles.errorText}>Phone number is required</Text>}
 
-        <Text style={styles.label}>New Password (leave empty if not changing)</Text>
+        <Text style={styles.label}>New Password (optional)</Text>
         <TextInput
           style={styles.input}
           value={newPassword}
