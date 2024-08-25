@@ -6,6 +6,7 @@ import { EXPO_API_URL } from './(tabs)/enviroment';
 import { useAuth } from './(tabs)/AuthContext';
 
 const API_URL = EXPO_API_URL + '/users';
+const API_URL_PASSWORD = EXPO_API_URL + '/usersPassword';
 const ROLES_URL = EXPO_API_URL + '/roles';
 
 const EditFormUser: React.FC = () => {
@@ -81,13 +82,34 @@ const EditFormUser: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const response = await fetch(`${API_URL}/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0') , password : userData.password}),
-      });
+
+      var response;
+      if(userData.password=!''){
+        console.log("hola");
+        response = await fetch(`${API_URL}Password/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...userData,
+            sex: selectedSex,
+            role_id: parseInt(selectedRole || '0'),
+            phone: userData.phone,
+          }),
+        });
+      }
+      else{
+        console.log("hola2");
+        response = await fetch(`${API_URL}/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...userData, sex: selectedSex, role_id: parseInt(selectedRole || '0')}),
+        });
+      }
+      
       if (!response.ok) {
         throw new Error('Error updating user data');
       }
@@ -203,16 +225,33 @@ const EditFormUser: React.FC = () => {
                       )
                     : null
                   ))}
-                </Picker>
+              </Picker>
             </View>
             {errorMessages.includes('Role is required') && <Text style={styles.errorText}>Role is required</Text>}
           </>
         ) : null}
         
+        <Text style={styles.label}>Phone</Text>
+        <TextInput
+          style={styles.input}
+          value={userData?.phone || ''}
+          onChangeText={(text) => setUserData({ ...userData, phone: text })}
+          placeholder="Enter phone number"
+          keyboardType="phone-pad"
+        />
+        
+        <Text style={styles.label}>Password (optional)</Text>
+        <TextInput
+          style={styles.input}
+          secureTextEntry
+          value={userData?.password || ''}
+          onChangeText={(text) => setUserData({ ...userData, password: text })}
+          placeholder="Enter new password (optional)"
+        />
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
-            <Text style={styles.buttonText}>Update</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isSaving}>
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => navigation.goBack()}>
             <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
           </TouchableOpacity>

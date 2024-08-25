@@ -11,6 +11,7 @@ const FormScreen: React.FC = () => {
   const [DNI, setDNI] = useState('');
   const [age, setAge] = useState('');
   const [sex, setSex] = useState<string | null>(null);
+  const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,6 +44,7 @@ const FormScreen: React.FC = () => {
     if (!firstName) errors.push('First name is required');
     if (!lastName) errors.push('Last name is required');
     if (!DNI || DNI.length !== 8 || !/^\d+$/.test(DNI)) errors.push('DNI must be exactly 8 numeric characters');
+    if (!phone || phone.length !== 9 || !/^\d+$/.test(phone)) errors.push('Phone number must be exactly 9 numeric characters');
     if (!age || parseInt(age) <= 0) errors.push('Age must be a positive number');
     if (!sex) errors.push('Sex is required');
     if (!username) errors.push('Username is required');
@@ -61,12 +63,15 @@ const FormScreen: React.FC = () => {
       return;
     }
 
+    const formattedPhone = `51${phone}`;
+
     const newUser = {
       first_name: firstName,
       last_name: lastName,
       DNI,
       age: parseInt(age),
       sex,
+      phone: formattedPhone,
       username,
       email,
       password,
@@ -150,6 +155,16 @@ const FormScreen: React.FC = () => {
         </View>
         {errorMessages.includes('Sex is required') && <Text style={styles.errorText}>Sex is required</Text>}
 
+        <Text style={styles.label}>Phone</Text>
+        <TextInput
+          style={styles.input}
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="Enter phone"
+          keyboardType="numeric"
+        />
+        {errorMessages.includes('Phone number must be exactly 9 numeric characters') && <Text style={styles.errorText}>Phone number must be exactly 9 numeric characters</Text>}
+
         <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
@@ -188,10 +203,10 @@ const FormScreen: React.FC = () => {
           >
             <Picker.Item label="Select a role" value="" />
             {roles.map((role) => (
-              user!=null ? 
+              user != null ? 
                 user.role === 'medico' ?
-                  Number(role.id)==3 ? 
-                    <Picker.Item key={role.id} label={role.name} value={role.id}/>
+                  Number(role.id) === 3 ? 
+                    <Picker.Item key={role.id} label={role.name} value={role.id} />
                     :
                     null
                 : (
