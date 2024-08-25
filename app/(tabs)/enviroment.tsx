@@ -1,1 +1,1 @@
-export const EXPO_API_URL = "http://13.116.92.229:8000";
+export const EXPO_API_URL = "http://13.116.88.85:10500";
