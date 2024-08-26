@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app-movil-heart",
-    "slug": "app-movil-heart",
+    "name": "my-app",
+    "slug": "my-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,11 +15,13 @@
     "ios": {
       "supportsTablet": true
     },
+    "sdkVersion": "51.0.0",
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "versionCode": 1,
       "package": "com.jackpr.appmovilheart",
       "permissions": [
         "INTERNET",
@@ -43,9 +45,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "481f1725-daba-4575-95b6-9970e0b0de5b"
+        "projectId": "0f714bb9-e9a1-4a8a-ab2e-a7a5900e787c"
       }
     },
-    "owner": "jackpr"
+    "owner": "alfredo7792"
   }
 }

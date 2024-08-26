@@ -55,6 +55,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
+      <Image 
+        source={{ uri: 'https://source.unsplash.com/random/800x600' }} 
+        style={styles.logo} 
+      />
     </View>
   );
 };
@@ -108,7 +112,7 @@ const styles = StyleSheet.create({
     color: '#004d99',
     fontSize: 16,
     textDecorationLine: 'underline',
-  },
+  }
 });
 
 export default LoginScreen;
