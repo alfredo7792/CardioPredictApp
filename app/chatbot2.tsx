@@ -137,7 +137,7 @@ const Chatbot2 : React.FC = () => {
         // const { clientId } = route.params; 
 
         // var response = await fetch(`${EXPO_API_URL}/historial/${clientId}`);
-        var response = await fetch(`${EXPO_API_URL}/historial/`);
+        var response = null;
         if(user.role==="paciente"){
           response = await fetch(`${EXPO_API_URL}/historial/${user.user_id}`);
         }
