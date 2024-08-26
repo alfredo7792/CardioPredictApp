@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     padding: 20,
+    backgroundColor: '#ffffff'
   },
   profileHeader: {
     alignItems: 'center',
