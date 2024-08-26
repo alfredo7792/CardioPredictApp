@@ -12,6 +12,7 @@ interface User {
   id: number;
   first_name: string;
   last_name: string;
+  phone: string;
   DNI: string;
   email: string;
   role_id: number;
@@ -170,16 +171,16 @@ const HomeScreen: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleView = (id: number, age: number, sex: string) => {
-    navigation.navigate('indexConsultas', { id, age, sex });
+  const handleView = (id: number, age: number, sex: string, phone: string) => {
+    navigation.navigate('indexConsultas', { id, age, sex, phone });
   };
 
-  const handleConsulta = (id: number, age: number, sex: string, roleUser: string | undefined) => {
-    navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex });
+  const handleConsulta = (id: number, age: number, sex: string, roleUser: string | undefined, phone: string) => {
+    navigation.navigate('ConsultasScreen', { clientId: id, ageCategory: age, sex: sex, phone: phone });
   };
 
-  const handleChatBot = (id: number) => {
-    navigation.navigate('chatbot2', { clientId: id });
+  const handleChatBot = (id: number, phone: string) => {
+    navigation.navigate('chatbot2', { clientId: id, phone: phone });
   };
 
   const filteredData = data.filter(user => {
@@ -206,17 +207,17 @@ const HomeScreen: React.FC = () => {
           </TouchableOpacity>
         )}  
         {(isMedico||isPaciente) && (
-        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex, item.role_name)}>
+        <TouchableOpacity style={[styles.actionButton, styles.consultaButton]} onPress={() => handleConsulta(item.id, item.age, item.sex, item.role_name, item.phone)}>
           <Icon name="medkit-outline" size={20} color="white" />
         </TouchableOpacity>
         )}
         {(isMedico||isPaciente) && (
-        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id)}>
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleChatBot(item.id, item.phone)}>
           <Icon name="chatbubble-ellipses-outline" size={20} color="white" />
         </TouchableOpacity>
         )}
         {(isMedico) && (
-        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex)}>
+        <TouchableOpacity style={[styles.actionButton, styles.viewButton]} onPress={() => handleView(item.id, item.age, item.sex, item.phone)}>
             <Icon name="eye-outline" size={20} color="white" />
         </TouchableOpacity>
         )}

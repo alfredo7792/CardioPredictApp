@@ -5,7 +5,7 @@ import { ActivityIndicator, ScrollView, View, Text, TouchableOpacity, Alert, Tex
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import { EXPO_API_URL } from "./(tabs)/enviroment";
+import { EXPO_API_URL, WHATSAPP_API_URL } from "./(tabs)/enviroment";
 
 
 interface Revision {
@@ -16,6 +16,38 @@ interface Revision {
   diagnosis: string;
   key_factors: string;
   patient_status: 'LEVE' | 'MEDIO' | 'GRAVE';
+  date_created: string;
+}
+
+interface Historial {
+  id: number;
+  client_id: number;
+  HeartDisease: number;
+  RiskPercentage: number;
+  Factors: string;
+  Sex: number;
+  GeneralHealth: number;
+  PhysicalHealthDays: number;
+  MentalHealthDays: number;
+  PhysicalActivities: number;
+  SleepHours: number;
+  HadStroke: number;
+  HadKidneyDisease: number;
+  HadDiabetes: number;
+  DifficultyWalking: number;
+  SmokerStatus: number;
+  RaceEthnicityCategory: number;
+  AgeCategory: number;
+  BMI: number;
+  AlcoholDrinkers: number;
+  HadHighBloodCholesterol: number;
+  dateRegistration: string;
+  results_id: number;
+  start_time: number;
+  end_time: number;
+  diagnosis: string;
+  key_factors: string;
+  patient_status: string;
   date_created: string;
 }
 
@@ -51,7 +83,7 @@ const convertTimeToSeconds = (time: string) => {
 // ------------------------------------------------------------------------
 const IndexConsultas: React.FC = () => {
   const route = useRoute<any>();
-  const { id, age, sex } = route.params;
+  const { id, age, sex, phone } = route.params;
   const [dataResultados, setDataResultados] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
@@ -147,6 +179,116 @@ const IndexConsultas: React.FC = () => {
       .catch((error) => {
         console.error('Error fetching revision:', error);
       });
+
+  };
+
+
+
+  const handleSendMessage = async (idResult: number) => {
+    try {
+      // Paso 1: Obtener los datos de la revisión
+      const revisionResponse = await fetch(`${EXPO_API_URL}/api/revision/by_result_id/${idResult}`);
+      if (!revisionResponse.ok) {
+        throw new Error('Error fetching revision data');
+      }
+      const revisionData: Revision = await revisionResponse.json();
+  
+      // Paso 2: Obtener todos los resultados del cliente
+      const resultsResponse = await fetch(`${EXPO_API_URL}/results/${id}`);
+      if (!resultsResponse.ok) {
+        throw new Error('Error fetching client results');
+      }
+      const allResults: Historial[] = await resultsResponse.json();
+      // Filtrar para obtener el resultado específico
+      const result = allResults.find((historial) => historial.id === idResult);
+      if (!result) {
+        throw new Error('Result not found for the given results_id');
+      }
+  
+      // Constantes para formatear los valores
+      const SEX = { 1: 'Masculino', 2: 'Femenino' };
+      const GEN_HEALTH = { 1: "Excelente", 2: "Muy buena", 3: "Buena", 4: "Regular", 5: "Mala" };
+      const DIABETES = { 1: "Sí", 2: "Sí, pero solo durante el embarazo (mujer)", 3: "No", 4: "No, prediabetes o diabetes borderline" };
+      const SMOKER_STATUS = { 1: "Fumador actual - fuma todos los días", 2: "Fumador actual - fuma algunos días", 3: "Exfumador", 4: "Nunca ha fumado" };
+      const RACE = { 1: "Blanco solamente, no hispano", 2: "Negro solamente, no hispano", 3: "Otra raza solamente, no hispano", 4: "Multirracial, no hispano", 5: "Hispano" };
+      const AGE_CATEGORY = {
+        1: "Edad 18 a 24", 2: "Edad 25 a 29", 3: "Edad 30 a 34", 4: "Edad 35 a 39", 5: "Edad 40 a 44",
+        6: "Edad 45 a 49", 7: "Edad 50 a 54", 8: "Edad 55 a 59", 9: "Edad 60 a 64", 10: "Edad 65 a 69",
+        11: "Edad 70 a 74", 12: "Edad 75 a 79", 13: "Edad 80 o más"
+      };
+      const YES_NO = { 1: "Sí", 0: "No" };
+  
+      // Formatear el mensaje
+      const message = `
+        *Revisión:*
+        - ID: ${revisionData.id}
+        - Results ID: ${revisionData.results_id}
+        - Start Time: ${new Date(revisionData.start_time).toLocaleString()}
+        - End Time: ${new Date(revisionData.end_time).toLocaleString()}
+        - Diagnosis: ${revisionData.diagnosis}
+        - Key Factors: ${revisionData.key_factors}
+        - Patient Status: ${revisionData.patient_status}
+        - Date Created: ${revisionData.date_created}
+  
+        *Resultado del Cliente:*
+        - ID: ${result.id}
+        - Client ID: ${result.client_id}
+        - Enfermedad Cardiaca: ${YES_NO[result.HeartDisease  as keyof typeof YES_NO]}
+        - Porcentaje de Riesgo: ${result.RiskPercentage}%
+        - Factores: ${result.Factors}
+        - Sexo: ${SEX[result.Sex  as keyof typeof SEX]}
+        - Salud General: ${GEN_HEALTH[result.GeneralHealth  as keyof typeof GEN_HEALTH]}
+        - Días de Salud Física: ${result.PhysicalHealthDays}
+        - Días de Salud Mental: ${result.MentalHealthDays}
+        - Actividades Físicas: ${YES_NO[result.PhysicalActivities  as keyof typeof YES_NO]}
+        - Horas de Sueño: ${result.SleepHours}
+        - Ha Tenido un Derrame Cerebral: ${YES_NO[result.HadStroke  as keyof typeof YES_NO]}
+        - Ha Tenido Enfermedad Renal: ${YES_NO[result.HadKidneyDisease  as keyof typeof YES_NO]}
+        - Ha Tenido Diabetes: ${DIABETES[result.HadDiabetes  as keyof typeof DIABETES]}
+        - Dificultad para Caminar: ${YES_NO[result.DifficultyWalking  as keyof typeof YES_NO]}
+        - Estado de Fumador: ${SMOKER_STATUS[result.SmokerStatus  as keyof typeof SMOKER_STATUS]}
+        - Raza/Etnicidad: ${RACE[result.RaceEthnicityCategory  as keyof typeof RACE]}
+        - Categoría de Edad: ${AGE_CATEGORY[result.AgeCategory  as keyof typeof AGE_CATEGORY]}
+        - IMC: ${result.BMI}
+        - Consumidor de Alcohol: ${YES_NO[result.AlcoholDrinkers  as keyof typeof YES_NO]}
+        - Colesterol Alto: ${YES_NO[result.HadHighBloodCholesterol  as keyof typeof YES_NO]}
+        - Fecha de Registro: ${new Date(result.dateRegistration).toLocaleString()}
+        - Start Time: ${new Date(result.start_time).toLocaleString()}
+        - End Time: ${new Date(result.end_time).toLocaleString()}
+        - Diagnosis: ${result.diagnosis}
+        - Factores Clave: ${result.key_factors}
+        - Estado del Paciente: ${result.patient_status}
+        - Fecha de Creación: ${result.date_created}
+      `;
+  
+      // Preparar el cuerpo del mensaje
+      const body = {
+        phone: phone,
+        message: message.trim(),  // Asegúrate de que no haya espacios en blanco al principio y al final
+        mediaUrl: "https://www.muhealth.org/sites/default/files/2019-01/hearthealth-compressor.jpg"
+      };
+  
+      // Paso 3: Enviar el mensaje
+      const messageResponse = await fetch(`${WHATSAPP_API_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+  
+      if (messageResponse.ok) {
+        const result = await messageResponse.json();
+        console.log('Mensaje enviado exitosamente:', result);
+        // Aquí puedes manejar lo que sucede después de enviar el mensaje exitosamente
+      } else {
+        console.error('Error al enviar el mensaje:', messageResponse.statusText);
+        // Aquí puedes manejar los errores de la petición
+      }
+    } catch (error) {
+      console.error('Error en la petición:', error);
+      // Aquí puedes manejar errores de red o problemas inesperados
+    }
   };
 
   const handleSaveRevision = (idResult: number) => {
@@ -207,9 +349,14 @@ const IndexConsultas: React.FC = () => {
                 <Icon name="eye-outline" size={15} color="white" />
               </TouchableOpacity>
               {item.status_revision == 1 && (
+                <>
                 <TouchableOpacity style={styles.buttonReviewNew} onPress={() => handleEditRevision(item.id)}>
                   <Icon name="document-outline" size={15} color="yellow" />
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonWhatsapp} onPress={() => handleSendMessage(item.id)}>
+                  <Icon name="send" size={15} color="white" />
+                </TouchableOpacity>
+                </>
               )}
               {item.status_revision == 0 && (
                 <TouchableOpacity style={styles.buttonReviewEdit} onPress={() => handleSaveRevision(item.id)}>
@@ -435,6 +582,12 @@ const styles = StyleSheet.create({
   },
   buttonReviewNew: {
     backgroundColor: '#211100',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buttonWhatsapp: {
+    backgroundColor: '#49ff21',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,

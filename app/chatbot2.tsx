@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, Modal, Button, ScrollView } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Response from "@/components/response";
+import {Response} from "@/components/response";
+import {obtenerUM} from "@/components/response";
 import Message from "@/components/message";
 //import { useAuth } from './(tabs)/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -10,7 +11,7 @@ import { BarChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from './(tabs)/AuthContext';
-import { EXPO_API_URL } from './(tabs)/enviroment';
+import { EXPO_API_URL, WHATSAPP_API_URL } from './(tabs)/enviroment';
 
 const STORAGE_KEY = '@chat_history';
 const COUNTER_KEY = '@chat_counter';
@@ -87,7 +88,8 @@ const chartConfig = {
 const Chatbot2 : React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { clientId } = route.params; 
+  const { clientId, phone } = route.params; 
+
   
   const [inputText, setInputText] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
@@ -119,7 +121,8 @@ const Chatbot2 : React.FC = () => {
     "Analizar datos": "Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.",
     "Receta médica": "Genera una receta médica basada en la información del paciente, si o si , aunque sea general.",
     "Estilos de vida": "Sugiere cambios en el estilo de vida para mejorar la salud del paciente si o si aunque sea general.",
-    "Resumen general": "Proporciona un resumen general del estado de salud del paciente y recomendaciones si o si aunque sea general."
+    "Resumen general": "Proporciona un resumen general del estado de salud del paciente y recomendaciones si o si aunque sea general.",
+    "Enviar a Whatsapp": "Enviar"
   };
   
   useEffect(() => {
@@ -231,6 +234,46 @@ const Chatbot2 : React.FC = () => {
   const sendMessageToGemini = async (message: string) => {
     let fullMessage: string;
 
+    if (message === "Enviar") {
+      
+      const currentChat = chats.find(chat => chat.id === currentChatId);
+      const lastBotResponse = currentChat?.messages
+        .filter(msg => msg.isUser)
+        .pop()?.text;
+      
+        message=obtenerUM();
+
+      const body = {
+        phone: phone,
+        message: message,
+        mediaUrl: "https://www.muhealth.org/sites/default/files/2019-01/hearthealth-compressor.jpg"
+      };
+  
+      try {
+        const response = await fetch(`${WHATSAPP_API_URL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+  
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Mensaje enviado exitosamente:', result);
+          // Aquí puedes manejar lo que sucede después de enviar el mensaje exitosamente
+        } else {
+          console.error('Error al enviar el mensaje:', response.statusText);
+          // Aquí puedes manejar los errores de la petición
+        }
+      } catch (error) {
+        console.error('Error en la petición:', error);
+        // Aquí puedes manejar errores de red o problemas inesperados
+      }
+      return;
+
+    }
+
     if (message === "Toma el rol de un médico especializado en cardiología. Analiza los datos del paciente y proporciona una evaluación detallada.") {
       fullMessage = `
         Toma el rol de un médico especializado en cardiología. Tienes un paciente con la siguiente información:
@@ -268,6 +311,7 @@ const Chatbot2 : React.FC = () => {
       );
       setChats(updatedChats);
       saveChats(updatedChats);
+
     } catch (error) {
       console.error('Error sending message to Gemini:', error);
     }
@@ -468,7 +512,7 @@ function determineHealthStatus(analysisResult: string): string {
               item.text.includes("1. Evalúa el riesgo cardiovascular del paciente, prestando especial atención a la presencia o ausencia de enfermedad cardíaca") ? (
                 <Response prompt={item.text} prompt_img={generateHealthImage(item.text)} />
               ) : (
-                <Response prompt={item.text}prompt_img={"" }/>
+                <Response prompt={item.text}prompt_img={""} />
               )
             )}
           </View>

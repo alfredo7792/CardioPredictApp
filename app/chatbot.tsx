@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, Modal, Button, ScrollView } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Response from "@/components/response";
+import {Response} from "@/components/response";
 import Message from "@/components/message";
 import { useAuth } from './(tabs)/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';

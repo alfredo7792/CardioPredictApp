@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
 const API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 const headers = { "Authorization": `Bearer ${HUGGINGFACE_TOKEN}` };
-
+var ultimoMensaje = "";
 // Función para generar texto con Google Generative AI
 async function generateTextWithGemini(prompt) {
     try {
@@ -54,7 +54,11 @@ async function generateImageWithHuggingFace(prompt) {
 }
 
 
-export default function Response({ prompt, prompt_img }) {
+export function obtenerUM() {
+    return ultimoMensaje;
+}
+
+export  function Response({ prompt, prompt_img }) {
     const [generatedText, setGeneratedText] = useState("");
     const [generatedImage, setGeneratedImage] = useState(null);
 
@@ -75,6 +79,7 @@ export default function Response({ prompt, prompt_img }) {
 
     const date = new Date();
 
+    ultimoMensaje = generatedText;
     return (
         <View style={styles.response}>
             <View style={styles.header}>

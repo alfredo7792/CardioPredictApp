@@ -4,7 +4,7 @@ import { useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Alert, Button, Dimensions, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import { EXPO_API_URL } from "./(tabs)/enviroment";
+import { EXPO_API_URL, WHATSAPP_API_URL} from "./(tabs)/enviroment";
 
 interface ApiResponse {
   riesgo: string;
@@ -49,10 +49,12 @@ const ConsultasScreen: React.FC = () => {
   const route = useRoute<any>();
 
   const [step, setStep] = useState(1);
-
-  const [clientId, setClientId] = useState(route.params?.clientId?.toString() || ''); // Recibe clientId como string
+const [clientId, setClientId] = useState(route.params?.clientId?.toString() || ''); // Recibe clientId como string
+  
   const [sex, setSex] = useState(Number(getSexValue(route.params?.sex?.toString() || '')));
   const [ageCategory, setAgeCategory] = useState(Number(getAgeValue(Number(route.params?.ageCategory?.toString() || ''))));
+
+  const [phone, setPhone] = useState(route.params?.phone?.toString() || ''); // Recibe phone como string
 
   const [generalHealth, setGeneralHealth] = useState('');
   const [physicalHealthDays, setPhysicalHealthDays] = useState(0); // Cambiado a tipo numérico para el slider
@@ -103,6 +105,17 @@ const ConsultasScreen: React.FC = () => {
     };
 
 
+    const SEX = { 1: 'Masculino', 2: 'Femenino' };
+    const GEN_HEALTH = { 1: "Excelente", 2: "Muy buena", 3: "Buena", 4: "Regular", 5: "Mala" };
+    const DIABETES = { 1: "Sí", 2: "Sí, pero solo durante el embarazo (mujer)", 3: "No", 4: "No, prediabetes o diabetes borderline" };
+    const SMOKER_STATUS = { 1: "Fumador actual - fuma todos los días", 2: "Fumador actual - fuma algunos días", 3: "Exfumador", 4: "Nunca ha fumado" };
+    const RACE = { 1: "Blanco solamente, no hispano", 2: "Negro solamente, no hispano", 3: "Otra raza solamente, no hispano", 4: "Multirracial, no hispano", 5: "Hispano" };
+    const AGE_CATEGORY = {
+      1: "Edad 18 a 24", 2: "Edad 25 a 29", 3: "Edad 30 a 34", 4: "Edad 35 a 39", 5: "Edad 40 a 44",
+      6: "Edad 45 a 49", 7: "Edad 50 a 54", 8: "Edad 55 a 59", 9: "Edad 60 a 64", 10: "Edad 65 a 69",
+      11: "Edad 70 a 74", 12: "Edad 75 a 79", 13: "Edad 80 o más"
+    };
+    const YES_NO = { 1: "Sí", 0: "No" };
 
     try {
       const response = await fetch(`${EXPO_API_URL}/predict`, {
@@ -121,6 +134,59 @@ const ConsultasScreen: React.FC = () => {
       setApiResponse(result);  // Guardar la respuesta en el estado
       //Alert.alert('Resultado', Predicción: ${JSON.stringify(result)});
       Alert.alert('Resultado', `Predicción: ${JSON.stringify(result)}`);
+
+      const formattedText = `Saludos paciente, le envio los resultados de su consulta:\n\n` +
+      `- ID del Cliente: ${data.client_id}\n` +
+      `- Sexo: ${SEX[data.Sex as keyof typeof SEX]}\n` +
+      `- Salud General: ${GEN_HEALTH[data.GeneralHealth as keyof typeof GEN_HEALTH]}\n` +
+      `- Días de Salud Física: ${data.PhysicalHealthDays}\n` +
+      `- Días de Salud Mental: ${data.MentalHealthDays}\n` +
+      `- Actividades Físicas: ${YES_NO[data.PhysicalActivities as keyof typeof YES_NO]}\n` +
+      `- Horas de Sueño: ${data.SleepHours}\n` +
+      `- Ha Sufrido un Derrame Cerebral: ${YES_NO[data.HadStroke as keyof typeof YES_NO]}\n` +
+      `- Tiene Enfermedad Renal: ${YES_NO[data.HadKidneyDisease as keyof typeof YES_NO]}\n` +
+      `- Tiene Diabetes: ${DIABETES[data.HadDiabetes as keyof typeof DIABETES]}\n` +
+      `- Dificultad para Caminar: ${YES_NO[data.DifficultyWalking as keyof typeof YES_NO]}\n` +
+      `- Estatus de Fumador: ${SMOKER_STATUS[data.SmokerStatus as keyof typeof SMOKER_STATUS]}\n` +
+      `- Categoría de Raza/Etnicidad: ${RACE[data.RaceEthnicityCategory as keyof typeof RACE]}\n` +
+      `- Categoría de Edad: ${AGE_CATEGORY[data.AgeCategory as keyof typeof AGE_CATEGORY]}\n` +
+      `- Índice de Masa Corporal: ${data.BMI}\n` +
+      `- Bebedor de Alcohol: ${YES_NO[data.AlcoholDrinkers as keyof typeof YES_NO]}\n` +
+      `- Tiene Colesterol Alto: ${YES_NO[data.HadHighBloodCholesterol as keyof typeof YES_NO]}\n\n` +
+      `Resultado de la Predicción:\n- ${JSON.stringify(result)}`;
+
+      const dataTransformada = formattedText
+      .replace(/[{}[\]"]/g, '')   // Eliminar {}, [], y comillas
+      .replace(/,/g, '\n');      // Asegura espacio después de los dos puntos
+
+      const body = {
+        phone: phone,
+        message: dataTransformada,
+        mediaUrl: "https://www.muhealth.org/sites/default/files/2019-01/hearthealth-compressor.jpg"
+      };
+  
+      try {
+        const response = await fetch(`${WHATSAPP_API_URL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+  
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Mensaje enviado exitosamente:', result);
+          // Aquí puedes manejar lo que sucede después de enviar el mensaje exitosamente
+        } else {
+          console.error('Error al enviar el mensaje:', response.statusText);
+          // Aquí puedes manejar los errores de la petición
+        }
+      } catch (error) {
+        console.error('Error en la petición:', error);
+        // Aquí puedes manejar errores de red o problemas inesperados
+      }
+
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert('Error', error.message);
@@ -136,6 +202,7 @@ const ConsultasScreen: React.FC = () => {
   };
 
 
+  
   const chartData = {
     labels: apiResponse ? Object.keys(apiResponse.impacto) : [],
     datasets: [
@@ -403,6 +470,7 @@ const ConsultasScreen: React.FC = () => {
           <Button title="Enviar" onPress={handleSubmit} />
 
           {apiResponse && (
+
             <View style={styles.resultContainer}>
               <Text style={styles.resultTitle}>Resultado:</Text>
               <Text style={styles.resultText}>Riesgo: {apiResponse.riesgo}</Text>
